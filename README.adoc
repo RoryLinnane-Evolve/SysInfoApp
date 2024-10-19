@@ -1,0 +1,37 @@
+= host-info-agent
+:toc:
+
+This is the documentation for the host-info-agent (core) of the project. This component is the basis of all project extensions such as CLI tools.
+
+== Inspiration and project scope
+
+The inspiration of this project comes from distributed monitoring and observability tools such as Datadog, New Relic and Prometheus. These tools allow developers that deploy large scale cloud clusters with many nodes to track the status of all of their nodes in one dashboard, allowing them to debug issues, find bottlenecks in their cloud systems and catch potential problems before they happen by observing key metrics about their nodes.
+
+In theory, if a 'master' agent (with the purpose of aggregating data from many slave/node agents) was created, it could be 'plugged in' (per se) to listen to/pull data from many slave agents, resulting in a distributed observability and monitoring tool for the cluster. *The scope of this project resides extends no further than the node - or in other words - excludes the aggregation of data from slave/node agents like this one, _but is created with interfacing with a master node in mind_.*
+
+== Environments & running _host-info-agent_
+This application was made to run on Ubuntu based operating systems.
+
+== Available tools & modules
+
+=== Core
+This is the core package and API that retrieves system information. Could be used as the basis of another tool.
+
+=== CLI
+This is a command line tool that can be used to directly give information about system status. This includes information about:
+
+==== System information
+- Memory
+- CPU usage
+- Disk information
+
+==== Process information
+Gives information about processes running on a host. Can be potentially used to flag problematic/culprit processes that consume an unfavourable amount of system resources.
+
+=== Server
+This is a server process that can be started via the CLI to constantly run on a specified port. It accepts HTTPS requests and will retrieve and respond with system information on request.
+
+== Install
+
+
+== Deploy
