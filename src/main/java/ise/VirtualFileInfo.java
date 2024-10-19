@@ -24,8 +24,9 @@ public class VirtualFileInfo {
     }
 
     /**
-     * Creates a hash table from this.fileLocation, provided the file is a colon delimited
+     * Creates a hash table from this.fileLocation, provided the file is a colon seperated
      * stream of key value pairs.
+     * @return file contents as string,string hash table
      * */
     public Hashtable<String, String> getHashtable() throws IOException {
         FileReader file = new FileReader(this.fileLocation);

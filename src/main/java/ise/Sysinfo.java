@@ -1,18 +1,18 @@
-package ise;
-
-import java.io.IOException;
-import java.util.ArrayList;
-
 /**
  * A proof of concept application for distributed metrics slave agent.
  *
  * @version 1.0
  * @author Mikey Fennelly
  */
+package ise;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
 public class Sysinfo {
     public static void main(String[] args ) throws IOException {
 
-        String firstArg = "";
+        String firstArg;
         try {
             firstArg = args[0];
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -35,11 +35,8 @@ public class Sysinfo {
                     ProcessInfo processInfo = new ProcessInfo();
                     ArrayList<Integer> currentProcs = processInfo.getAllRunningPIDs();
 
-
-                    for (int i = 0; i < currentProcs.toArray().length; i++) {
-                        new ProcessInfo().createProcessInfoFromPID(3260);
-                        return;
-                    }
+                ProcessInfo testProc = new ProcessInfo();
+                testProc.createProcessInfoFromPID(3159);
             }
         }
     }
