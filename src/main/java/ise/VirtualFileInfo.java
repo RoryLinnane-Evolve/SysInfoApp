@@ -48,9 +48,3 @@ public class VirtualFileInfo {
         this.fileInfo = table;
     }
 }
-
-class NotKeyValueStreamException extends RuntimeException {
-    public NotKeyValueStreamException(String message) {
-        super(message);
-    }
-}
