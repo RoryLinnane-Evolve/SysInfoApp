@@ -6,6 +6,7 @@ import java.util.Set;
 /**
  * Object represents memory information on the host, and can be set to current
  * host values by calling non-static method SystemMemoryInfo.setMemInfo();
+ * All properties represent memory values in kB.
  * */
 public class SystemMemoryInfo {
     int total;
