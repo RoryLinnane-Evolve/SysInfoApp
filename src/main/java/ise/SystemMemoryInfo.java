@@ -1,7 +1,12 @@
 package ise;
 
 import java.io.IOException;
+import java.util.Set;
 
+/**
+ * Object represents memory information on the host, and can be set to current
+ * host values by calling non-static method SystemMemoryInfo.setMemInfo();
+ * */
 public class SystemMemoryInfo {
     int total;
     int free;
@@ -9,16 +14,15 @@ public class SystemMemoryInfo {
     int buffers;
     int cached;
 
-    public static void main(String[] args) throws IOException {
-        setMemInfo();
-    }
-
-    public static void setMemInfo() throws IOException {
+    public void setMemInfo() throws IOException {
+        Set<String> memoryAttributes = Set.of("MemTotal", "MemFree", "MemAvailable", "Buffers", "Cached");
         VirtualFileInfo meminfo = new VirtualFileInfo("/proc/meminfo");
         meminfo.setHashtable();
-        meminfo.fileInfo.forEach((key, value) -> {
-
-        });
+        this.total = trimAndCastToInt(meminfo.fileInfo.get("MemTotal"), "kB");
+        this.free = trimAndCastToInt(meminfo.fileInfo.get("MemFree"), "kB");
+        this.available = trimAndCastToInt(meminfo.fileInfo.get("MemAvailable"), "kB");
+        this.buffers = trimAndCastToInt(meminfo.fileInfo.get("Buffers"), "kB");
+        this.cached = trimAndCastToInt(meminfo.fileInfo.get("Cached"), "kB");
     }
 
     /**

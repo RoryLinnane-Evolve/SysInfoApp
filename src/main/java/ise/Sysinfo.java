@@ -25,11 +25,9 @@ public class Sysinfo {
             switch (firstArg) {
                 case "cpu":
                     VirtualFileInfo cpuinfo = new VirtualFileInfo("/proc/cpuinfo");
-                    cpuinfo.printInfoTable();
                     break;
                 case "mem":
                     VirtualFileInfo meminfo = new VirtualFileInfo("/proc/meminfo");
-                    meminfo.printInfoTable();
                     break;
                 case "allprocs":
                     ProcessInfo processInfo = new ProcessInfo();
