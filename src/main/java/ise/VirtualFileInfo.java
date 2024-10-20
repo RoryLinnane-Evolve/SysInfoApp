@@ -18,17 +18,17 @@ import java.util.stream.Stream;
 
 public class VirtualFileInfo {
     public String fileLocation;
-
     public VirtualFileInfo(String fileLocation) {
         this.fileLocation = fileLocation;
     }
+    public Hashtable<String, String> fileInfo;
 
     /**
-     * Creates a hash table from this.fileLocation, provided the file is a colon seperated
+     * Sets this.fileInfo, provided the file is a colon seperated
      * stream of key value pairs.
-     * @return file contents as string,string hash table
+     * @return void
      * */
-    public Hashtable<String, String> getHashtable() throws IOException {
+    public void setHashtable() throws IOException {
         FileReader file = new FileReader(this.fileLocation);
         BufferedReader reader = new BufferedReader(file);
         Stream<String> lines = reader.lines();
@@ -45,11 +45,12 @@ public class VirtualFileInfo {
             }
         });
 
-        return table;
+        this.fileInfo = table;
     }
+}
 
-    public void printInfoTable() throws IOException {
-        Hashtable<String, String> infoTable = this.getHashtable();
-        infoTable.forEach((key, value) -> System.out.println(key + ": " + value));
+class NotKeyValueStreamException extends RuntimeException {
+    public NotKeyValueStreamException(String message) {
+        super(message);
     }
 }

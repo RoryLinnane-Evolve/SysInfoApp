@@ -3,18 +3,21 @@ package ise;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 enum ProcState {
     RUN, SLEEP, UNINTERRUPTABLE_SLEEP, STOPPED, ZOMBIE
 }
 
+/**
+ * This class can create an object with information about currently running processes
+ * on the host machine, such as name, pid, ppid, state
+ * @author Mikey Fennelly
+ * */
 public class ProcessInfo {
     String name;
     int pid;
     int ppid;
     ProcState state;
-
 
     public static ArrayList<Integer> getAllRunningPIDs() {
         ArrayList<Integer> runningPIDs = new ArrayList<>();
@@ -33,14 +36,18 @@ public class ProcessInfo {
         return runningPIDs;
     }
 
-    public void createProcessInfoFromPID(int pid) throws IOException {
+    /**
+     * Sets the properties of the process class based on the values of
+     * /proc/&lt;pid&gt;/status
+     * */
+    public void setProcessInfoFromPID(int pid) throws IOException {
         String stringProcessID = Integer.toString(pid);
         VirtualFileInfo statusInfo = new VirtualFileInfo("/proc/" + stringProcessID + "/status");
-        Hashtable statusInfoTable = statusInfo.getHashtable();
-        this.name = (String) statusInfoTable.get("Name");
-        this.pid = Integer.parseInt(statusInfoTable.get("Pid").toString());
-        this.ppid = Integer.parseInt(statusInfoTable.get("PPid").toString());
-        String state = statusInfoTable.get("State").toString();
+        statusInfo.setHashtable();
+        this.name = (String) statusInfo.fileInfo.get("Name");
+        this.pid = Integer.parseInt(statusInfo.fileInfo.get("Pid").toString());
+        this.ppid = Integer.parseInt(statusInfo.fileInfo.get("PPid").toString());
+        String state = statusInfo.fileInfo.get("State").toString();
         switch (state) {
             case "S (sleeping)":
                 this.state = ProcState.SLEEP;
@@ -59,5 +66,4 @@ public class ProcessInfo {
                 break;
         }
     }
-
 }

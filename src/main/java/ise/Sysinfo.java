@@ -36,7 +36,7 @@ public class Sysinfo {
                     ArrayList<Integer> currentProcs = processInfo.getAllRunningPIDs();
 
                 ProcessInfo testProc = new ProcessInfo();
-                testProc.createProcessInfoFromPID(3159);
+                testProc.setProcessInfoFromPID(3159);
             }
         }
     }
