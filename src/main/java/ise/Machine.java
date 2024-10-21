@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * Metadata representing the static parts of the host machine.
+ * This class is distinct
+ * */
 public class Machine {
     private String cpuName;
     private String ram;
