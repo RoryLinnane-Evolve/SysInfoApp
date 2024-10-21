@@ -11,12 +11,13 @@ import java.util.ArrayList;
 
 public class Sysinfo {
     public static void main(String[] args) throws IOException {
-        SystemMemoryInfo smi = new SystemMemoryInfo();
+        CPU cpu = new CPU();
+        System.out.println(cpu.getNumCPUs());
     }
 }
 
 interface SysinfoInterface {
     ArrayList<Integer> getRunningPIDs();
-    ProcessInfo getProcessInfo(int pid);
+    SystemProcessInfo getProcessInfo(int pid);
     SystemMemoryInfo getSystemMemoryInfo();
 }

@@ -1,8 +1,5 @@
 package ise;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-
 public class CPU {
     private int numCPUs;
 

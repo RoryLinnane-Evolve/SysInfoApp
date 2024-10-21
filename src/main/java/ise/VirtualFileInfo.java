@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.stream.Stream;
 
@@ -46,5 +47,13 @@ public class VirtualFileInfo {
         });
 
         this.fileInfo = table;
+    }
+
+    public void <t, K> setHashMapWithArray() throws IOException {
+        FileReader file = new FileReader(this.fileLocation);
+        BufferedReader reader = new BufferedReader(file);
+        Stream<String> lines = reader.lines();
+
+        HashMap<String>
     }
 }
