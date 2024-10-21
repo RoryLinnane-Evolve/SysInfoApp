@@ -8,7 +8,19 @@
 
 package ise;
 
+import java.io.IOException;
+
+enum ProcState {
+    RUN, SLEEP, UNINTERRUPTABLE_SLEEP, STOPPED, ZOMBIE
+}
+
+/**
+ * Provides information about processes similar to that of running the 'top'/'htop' command
+ * in bash
+ * */
 public class Process {
+    private String name;
+    private ProcState state;
     private int pid;
     private int ppid;
     private float cpuPercent;
@@ -17,48 +29,59 @@ public class Process {
     private int priority;
     private int niceness;
 
-    public void setPID(int pid) {
-        this.pid = pid;
+    /**
+     * Sets the properties of the process class based on the values of
+     * /proc/&lt;pid&gt;/status
+     */
+    public Process(int pid) throws IOException {
+        setProcessInfoFromPID(pid);
+    }
+
+    private void setProcessInfoFromPID(int pid) throws IOException {
+        String stringProcessID = Integer.toString(pid);
+        VirtualFileInfo statusInfo = new VirtualFileInfo("/proc/" + stringProcessID + "/status");
+        statusInfo.setHashtable();
+        this.name = (String) statusInfo.fileInfo.get("Name");
+        this.pid = Integer.parseInt(statusInfo.fileInfo.get("Pid").toString());
+        this.ppid = Integer.parseInt(statusInfo.fileInfo.get("PPid").toString());
+        String state = statusInfo.fileInfo.get("State").toString();
+        switch (state) {
+            case "S (sleeping)":
+                this.state = ProcState.SLEEP;
+                break;
+            case "R (running)":
+                this.state = ProcState.RUN;
+                break;
+            case "T (stopped)":
+                this.state = ProcState.STOPPED;
+                break;
+            case "Z (zombie)":
+                this.state = ProcState.ZOMBIE;
+                break;
+            case "D (uninterruptable sleep)":
+                this.state = ProcState.UNINTERRUPTABLE_SLEEP;
+                break;
+        }
     }
 
     public int getPID() {
         return pid;
     }
 
-    public void setPPID(int ppid) {
-        this.ppid = ppid;
-    }
-
     public int getPPID() {
         return ppid;
-    }
-
-    public void setCpuPercent(float cpuPercent) {
-        this.cpuPercent = cpuPercent;
     }
 
     public float getCpuPercent() {
         return cpuPercent;
     }
 
-    public void setVirtualMemoryGB(int virtualMemoryGB) {
-        this.virtualMemoryGB = virtualMemoryGB;
-    }
-
     public int getVirtualMemoryGB() {
         return virtualMemoryGB;
     }
 
-    public void setSharedMemoryGB(int sharedMemoryGB) {
-        this.sharedMemoryGB = sharedMemoryGB;
-    }
-
     public int getSharedMemoryGB() {
         return sharedMemoryGB;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
     }
 
     public int getPriority() {
@@ -67,9 +90,5 @@ public class Process {
 
     public int getNiceness() {
         return niceness;
-    }
-
-    public void setNiceness(int niceness) {
-        this.niceness = niceness;
     }
 }
