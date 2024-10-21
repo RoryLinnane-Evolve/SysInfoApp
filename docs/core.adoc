@@ -1,0 +1,34 @@
+= host-agent-core
+:toc:
+
+Conceptually this sysinfo application is based around the core functionality.
+
+== Classes
+=== Sysinfo
+This class serves as the entrypoint class for the application.
+
+Currently, the interface for the Sysinfo class is being created, but as of now the available methods are:
+
+[source, java]
+----
+interface SysinfoInterface {
+    ArrayList<Integer> getRunningPIDs();
+    ProcessInfo getProcessInfo(int pid);
+    SystemMemoryInfo getSystemMemoryInfo();
+}
+----
+
+=== ProcessInfo
+
+==== Properties
+Reads the /proc/<pid>/status virtual file to return a class with properties such as
+
+- _name_ (the name of the process)
+- _pid_ (the process ID number)
+- _ppid_ (the pid of this process' parent)
+- _state_ (the state of the process, which can be one of 5 process states: _RUN_, _SLEEP_, _UNINTERRUPTABLE_SLEEP_, _STOPPED_, _ZOMBIE_)
+
+==== Methods
+
+Has methods to get global system information, such as the PIDs of all running processes on the host:
+
