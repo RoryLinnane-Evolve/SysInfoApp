@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Sysinfo {
-
+    public static void main(String[] args) throws IOException {
+        SystemMemoryInfo smi = new SystemMemoryInfo();
+    }
 }
 
 interface SysinfoInterface {

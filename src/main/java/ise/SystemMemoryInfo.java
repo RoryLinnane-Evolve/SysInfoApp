@@ -9,14 +9,17 @@ import java.util.Set;
  * All properties represent memory values in kB.
  * */
 public class SystemMemoryInfo {
-    int total;
-    int free;
-    int available;
-    int buffers;
-    int cached;
+    public int total;
+    public int free;
+    public int available;
+    public int buffers;
+    public int cached;
 
-    public void setMemInfo() throws IOException {
-        Set<String> memoryAttributes = Set.of("MemTotal", "MemFree", "MemAvailable", "Buffers", "Cached");
+    public SystemMemoryInfo() throws IOException {
+        setMemInfo();
+    }
+
+    private void setMemInfo() throws IOException {
         VirtualFileInfo meminfo = new VirtualFileInfo("/proc/meminfo");
         meminfo.setHashtable();
         this.total = trimAndCastToInt(meminfo.fileInfo.get("MemTotal"), "kB");
