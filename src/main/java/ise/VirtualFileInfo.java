@@ -10,9 +10,9 @@
 package ise;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.stream.Stream;
@@ -49,11 +49,19 @@ public class VirtualFileInfo {
         this.fileInfo = table;
     }
 
-    public void <t, K> setHashMapWithArray() throws IOException {
+    public  <T, K> HashMap<T, K[]> getGenericHashMap() throws IOException {
         FileReader file = new FileReader(this.fileLocation);
         BufferedReader reader = new BufferedReader(file);
         Stream<String> lines = reader.lines();
 
-        HashMap<String>
+        HashMap<T, K[]> table = new HashMap<>();
+        lines.forEach(line -> {
+            String[] splitLine = line.split(" ");
+            T key = (T) splitLine[0];
+            K[] value = (K[]) Arrays.copyOfRange(splitLine, 1, splitLine.length);
+            table.put(key, value);
+        });
+
+        return table;
     }
 }
