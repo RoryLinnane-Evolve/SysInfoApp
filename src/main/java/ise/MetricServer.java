@@ -1,134 +1,67 @@
-/**
- * This is the file for the server that recieves get requests
- * from prometheus and responds with the data in the gauges set out below.
- * The data is set every 4 seconds
- *
- * @author Rory Linnane
- * @version 1.0
- * */
-
 package ise;
 
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
-import io.prometheus.client.GaugeMetricFamily;
 import io.prometheus.client.exporter.HTTPServer;
 import ise.SystemMemoryInfo;
-import java.lang.Math;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 
 public class MetricServer {
 
+    // Create a counter metric for requests
+    static final Counter requests = Counter.build()
+            .name("requests_total").help("Total requests to this service.").register();
+
     // Create gauge metrics for system memory properties
     static final Gauge totalMemory = Gauge.build()
-            .name("system_memory_total_kilobytes")
-            .help("Total system memory in kilobytes.")
+            .name("system_memory_total_bytes")
+            .help("Total system memory in bytes.")
             .register();
 
     static final Gauge freeMemory = Gauge.build()
-            .name("system_memory_free_kilobytes")
-            .help("Free system memory in kilobytes.")
+            .name("system_memory_free_bytes")
+            .help("Free system memory in bytes.")
             .register();
 
-    static final Gauge systemMemoryUsage = Gauge.build()
-            .name("system_memory_usage")
-            .help("System memory usage percentage.")
+    static final Gauge availableMemory = Gauge.build()
+            .name("system_memory_available_bytes")
+            .help("Available system memory in bytes.")
             .register();
 
-    static final Gauge systemCPUMHz = Gauge.build()
-            .name("system_CPU_MHz")
-            .help("CPU clock speed in megahertz.")
+    static final Gauge buffersMemory = Gauge.build()
+            .name("system_memory_buffers_bytes")
+            .help("Buffered system memory in bytes.")
             .register();
 
-    static final Gauge processInfo = Gauge.build()
-            .name("system_process_info")
-            .help("Information about system processes")
-            .labelNames("pid", "name", "state")
+    static final Gauge cachedMemory = Gauge.build()
+            .name("system_memory_cached_bytes")
+            .help("Cached system memory in bytes.")
             .register();
-
 
     public static void main(String[] args) throws IOException {
-        // Starts a http server
+        // Expose metrics at localhost:8080/metrics
         HTTPServer server = new HTTPServer(8080);
 
+        // Simulate some work: increment the counter and update memory gauges
+        while (true) {
+            requests.inc();  // Increment the request counter
 
-        Thread memAndCPU = new Thread(() -> {
             try {
-                systemMemmoryAndCPUUpdater();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        Thread procs = new Thread(() -> {
-            try {
-                processesUpdater();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-        procs.start();
-        memAndCPU.start();
-    }
-
-    public static void systemMemmoryAndCPUUpdater() throws Exception{
-        VirtualFileInfo cpuinfo = new VirtualFileInfo("/proc/cpuinfo");
-        ProcStatVF coresinfo = new ProcStatVF("/proc/stat");
-        while(true){
-            try{
                 // Get system memory information
                 SystemMemoryInfo mem = new SystemMemoryInfo();
 
-                // Update the memory Gauges with the current memory info
+                // Update the Gauges with the current memory info
                 totalMemory.set(mem.total);
                 freeMemory.set(mem.free);
+                availableMemory.set(mem.available);
+                buffersMemory.set(mem.buffers);
+                cachedMemory.set(mem.cached);
 
-                // get the memory usage percentage by dividing the (total memory - available memory) by the total memory and multiplying by 100
-                double memusage = (double)(mem.total-mem.available)/mem.total * 100;
-                systemMemoryUsage.set(Math.round(memusage));
+                Thread.sleep(1000);  // Simulate a delay (e.g., each second)
 
-                //Update cpu mhz
-                cpuinfo.setHashtable();
-                //retrieve it from Hashtable and update gauge
-                double cpuMHz = Double.parseDouble(cpuinfo.fileInfo.get("cpu MHz"));
-                systemCPUMHz.set(cpuMHz);
-
-                //Get core info
-                //Hashtable<String, Hashtable<String, Long>> cores = coresinfo.getCPUOccupationTablesJiffies();
-
-                Thread.sleep(4000);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public static void processesUpdater() throws Exception{
-        ProcStat proc = new ProcStat();
-        int idss = 0;
-        while (true){
-            try{
-                //Get process
-                ArrayList<Integer> pids = SystemProcessInfo.getAllRunningPIDs();
-                for (int id : pids) {
-                    idss = id;
-                    Map<String, Object> procInfo = proc.getProcessInfo(id);
-
-//                    processInfo.labels(
-//                            String.valueOf(),
-//                            process.getName(),
-//                            String.valueOf(process.getState())
-//                    ).set(process.getCpuPercent());
-                }
-                Thread.sleep(4000);
-            } catch (Exception e){
-                System.out.println(idss);
-                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
