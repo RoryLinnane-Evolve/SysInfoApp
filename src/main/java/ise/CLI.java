@@ -1,52 +1,47 @@
 package ise;
+
 import org.apache.commons.cli.*;
+import org.apache.commons.io.*;
+import org.apache.commons.lang3.*;
 
-import java.io.*;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.io.PrintWriter;
 
-/**
- * implements the CLI functionality of the application
- * @author Mikey Fennelly
- * @version 1.0
- */
 public class CLI {
-    private static Map<Option, ArrayList<String>> optionsAndValidValues = new HashMap<Option, ArrayList<String>>();
 
-    static Option markMode = Option.builder("m")
-            .longOpt("markMode")
-            .desc("Submodule used to specify system information and attached devices")
-            .hasArgs()
-            .valueSeparator(' ')
-            .hasArg(true)
-            .build();
+    private static final Option cpu = new Option("c","cpu",false,"display cpu relevant information");
+    private static final Option busses = new Option("b","busses",false,"display relevant bus information");
+    private static final Option devices = new Option("d","devices",false,"display relevant bus information");
 
-    public static void main(String[] programArgs) {
-        Options validOptions = new Options();
-        HelpFormatter helpFormatter = new HelpFormatter();
-        CommandLineParser parser = new DefaultParser();
-
-        validOptions.addOption(markMode);
-        try {
-            CommandLine cmd = parser.parse(validOptions, programArgs);
-            processOptions(cmd);
-        } catch (ParseException e) {
-            System.err.println("Parsing failed. Reason: " + e.getMessage());
-        }
+    private static void printHelp(Options options) {
+        HelpFormatter formatter = new HelpFormatter();
+        PrintWriter pw = new PrintWriter(System.out);
+        pw.println("RCHM "+ Math.class.getPackage().getImplementationVersion());
+        pw.println();
+        formatter.printUsage(pw,100, "java -jar RCHM.jar [options]");
+        formatter.printOptions(pw, 100, options, 2, 5);
+        pw.close();
     }
 
-    private static void listPCIDevices() {
-        System.out.println("PCI Devices");
-    }
 
-    private static void processOptions(CommandLine cmd) throws ParseException {
-        // iterate through all options parser parsed
-        for (Option option : cmd.getOptions()) {
-            String[] optionVals = option.getValues();
+    public static void main(String[] args){
+        CommandLineParser clp = new DefaultParser();
+
+        Options options = new Options();
+        options.addOption(cpu);
+        options.addOption(busses);
+        options.addOption(devices);
+        try{
+            CommandLine cl = clp.parse(options,args);
+
+            if (cl.getArgList().size() != 1){
+                printHelp(options);
+                System.exit(-1);
+            }
+
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        // iterate through options
-        // check if the option values are valid
-        // check validity of optionValues for the arg
+
     }
 }
