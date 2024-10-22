@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.stream.Stream;
 
-public class VirtualFileInfo {
+public class VirtualFileInfo<T, K> {
     public String fileLocation;
     public VirtualFileInfo(String fileLocation) {
         this.fileLocation = fileLocation;
@@ -49,7 +49,7 @@ public class VirtualFileInfo {
         this.fileInfo = table;
     }
 
-    public  <T, K> HashMap<T, K[]> getGenericHashMap() throws IOException {
+    public  <T, K> HashMap<?, ?[]> getGenericHashMap() throws IOException {
         FileReader file = new FileReader(this.fileLocation);
         BufferedReader reader = new BufferedReader(file);
         Stream<String> lines = reader.lines();
