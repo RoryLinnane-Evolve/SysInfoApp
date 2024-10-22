@@ -8,11 +8,19 @@ package ise;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Sysinfo {
     public static void main(String[] args) throws IOException {
-        CPU cpu = new CPU();
-        System.out.println(cpu.getNumCPUs());
+//        ArrayList<Integer> pIds = SystemProcessInfo.getAllRunningPIDs();
+//
+//        for (Map.Entry<String, String[]> entry : hashMap.entrySet()) {
+//            String key = entry.getKey();
+//            String[] values = entry.getValue();
+//            System.out.println("Key: " + key + " | Values: " + Arrays.toString(values));
+//        }
     }
 }
 
