@@ -7,6 +7,7 @@
   <groupId>ise</groupId>
   <artifactId>host-info-agent</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
   <name>host-info-agent</name>
   <description>A simple host-info-agent.</description>
