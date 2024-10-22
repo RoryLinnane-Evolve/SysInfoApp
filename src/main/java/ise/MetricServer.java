@@ -1,50 +1,52 @@
-/**
- * This is the file for the server that recieves get requests
- * from prometheus and responds with the data in the gauges set out below.
- * The data is set every 4 seconds
- *
- * @author Rory Linnane
- * @version 1.0
- * */
-
 package ise;
 
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.HTTPServer;
 import ise.SystemMemoryInfo;
-import java.lang.Math;
 
 import java.io.IOException;
 
 public class MetricServer {
 
+    // Create a counter metric for requests
+    static final Counter requests = Counter.build()
+            .name("requests_total").help("Total requests to this service.").register();
+
     // Create gauge metrics for system memory properties
     static final Gauge totalMemory = Gauge.build()
-            .name("system_memory_total_kilobytes")
-            .help("Total system memory in kilobytes.")
+            .name("system_memory_total_bytes")
+            .help("Total system memory in bytes.")
             .register();
 
     static final Gauge freeMemory = Gauge.build()
-            .name("system_memory_free_kilobytes")
-            .help("Free system memory in kilobytes.")
+            .name("system_memory_free_bytes")
+            .help("Free system memory in bytes.")
             .register();
 
-    static final Gauge systemMemoryUsage = Gauge.build()
-            .name("system_memory_usage")
-            .help("System memory usage percentage.")
+    static final Gauge availableMemory = Gauge.build()
+            .name("system_memory_available_bytes")
+            .help("Available system memory in bytes.")
             .register();
 
-    static final Gauge systemCPUUsage = Gauge.build()
-            .name("system_CPU_usage")
-            .help("CPU usage percentage.")
+    static final Gauge buffersMemory = Gauge.build()
+            .name("system_memory_buffers_bytes")
+            .help("Buffered system memory in bytes.")
+            .register();
+
+    static final Gauge cachedMemory = Gauge.build()
+            .name("system_memory_cached_bytes")
+            .help("Cached system memory in bytes.")
             .register();
 
     public static void main(String[] args) throws IOException {
-        // Starts a http server
+        // Expose metrics at localhost:8080/metrics
         HTTPServer server = new HTTPServer(8080);
 
+        // Simulate some work: increment the counter and update memory gauges
         while (true) {
+            requests.inc();  // Increment the request counter
+
             try {
                 // Get system memory information
                 SystemMemoryInfo mem = new SystemMemoryInfo();
@@ -52,17 +54,11 @@ public class MetricServer {
                 // Update the Gauges with the current memory info
                 totalMemory.set(mem.total);
                 freeMemory.set(mem.free);
+                availableMemory.set(mem.available);
+                buffersMemory.set(mem.buffers);
+                cachedMemory.set(mem.cached);
 
-                // get the memory usage percentage by dividing the (total memory - available memory) by the total memory and multiplying by 100
-                double memusage = (double)(mem.total-mem.available)/mem.total * 100;
-                systemMemoryUsage.set(Math.round(memusage));
-
-                //TODO: find cpu usage
-                double cpuUsage = 25;
-                systemCPUUsage.set(cpuUsage);
-
-                // delay 1 second
-                Thread.sleep(4);
+                Thread.sleep(1000);  // Simulate a delay (e.g., each second)
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
