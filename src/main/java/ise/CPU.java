@@ -7,6 +7,10 @@ public class CPU {
     private int numCPUs;
 
     public static void main(String[] args) throws IOException {
+        ProcStatVF stat = new ProcStatVF("/proc/stat");
+        Map<String, List<Integer>> statData = stat.getKVPs();
+
+        int dummyInt = 4;
     }
 }
 
@@ -15,7 +19,8 @@ class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Integer>>> 
         super(fileLocation);
     }
 
-    private Map<String, List<Integer>> getKVPs(){
+    // Gets key-value pairs for each line in the virtual file
+    public Map<String, List<Integer>> getKVPs() {
         Map<String, List<Integer>> KVPs = new HashMap<String, List<Integer>>();
 
         List<String> lines = this.getLines();
