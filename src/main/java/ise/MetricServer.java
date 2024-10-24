@@ -4,14 +4,13 @@ import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.HTTPServer;
 import ise.SystemMemoryInfo;
+import java.lang.Math;
 
 import java.io.IOException;
 
-public class MetricServer {
 
-    // Create a counter metric for requests
-    static final Counter requests = Counter.build()
-            .name("requests_total").help("Total requests to this service.").register();
+
+public class MetricServer {
 
     // Create gauge metrics for system memory properties
     static final Gauge totalMemory = Gauge.build()
@@ -39,14 +38,18 @@ public class MetricServer {
             .help("Cached system memory in kilobytes.")
             .register();
 
+    static final Gauge systemMemoryUsage = Gauge.build()
+            .name("system_memory_usage")
+            .help("System memory usage percentage.")
+            .register();
+
+
+
     public static void main(String[] args) throws IOException {
         // Expose metrics at localhost:8080/metrics
         HTTPServer server = new HTTPServer(8080);
 
-        // Simulate some work: increment the counter and update memory gauges
         while (true) {
-            requests.inc();  // Increment the request counter
-
             try {
                 // Get system memory information
                 SystemMemoryInfo mem = new SystemMemoryInfo();
@@ -57,8 +60,9 @@ public class MetricServer {
                 availableMemory.set(mem.available);
                 buffersMemory.set(mem.buffers);
                 cachedMemory.set(mem.cached);
-
-                Thread.sleep(1000);  // Simulate a delay (e.g., each second)
+                double memusage = (double)(mem.total-mem.available)/mem.total * 100;
+                systemMemoryUsage.set(Math.round(memusage));
+                Thread.sleep(1000);  // delay 1 second
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
