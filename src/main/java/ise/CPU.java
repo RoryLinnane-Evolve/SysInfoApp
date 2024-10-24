@@ -1,6 +1,7 @@
 package ise;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class CPU {
@@ -8,6 +9,8 @@ public class CPU {
 
     public static void main(String[] args) throws IOException {
         ProcStatVF stat = new ProcStatVF("/proc/stat");
+
+        Hashtable<String, Hashtable<String, Long>> CPUOccupationTablesJiffies = stat.getCPUOccupationTablesJiffies();
 
         int dummyInt = 4;
     }
@@ -44,7 +47,7 @@ class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Integer>>> 
         return KVPs;
     }
 
-    // Get the number of CPUs on the host machine
+    // Get the number of CPUs/cores on the host machine
     public int getNumCPUs() {
         Map<String, List<Long>> KVPs = this.getKVPs();
         int cpuCount = 0;
@@ -55,6 +58,33 @@ class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Integer>>> 
         }
         return cpuCount;
     }
+
+    // Returns a table of items that represents time a CPU/core spent at specific tasks in jiffies (1/100th of sec)
+    public Hashtable<String, Hashtable<String, Long>> getCPUOccupationTablesJiffies() {
+        Map<String, List<Long>> KVPs = this.getKVPs();
+        Set<Map.Entry<String, List<Long>>> entrySet = KVPs.entrySet();
+
+        Hashtable<String, Hashtable<String, Long>> CPUOccupationTablesJiffies = new Hashtable<>();
+
+        for (Map.Entry<String, List<Long>> entry : entrySet) {
+            String key = entry.getKey();
+            if (key.startsWith("cpu")) {
+                List<Long> thisKeyValues = KVPs.get(key);
+                Hashtable<String, Long> thisCPUOccupationTableJiffies = new Hashtable<>(10);
+                List<String> occupations = new ArrayList<>(Arrays.asList("userMode", "niceMode", "systemMode", "idleTask", "IOWait", "IRQ", "softIRQ"));
+
+                for (int i = 0; i < occupations.size(); i++) {
+                    thisCPUOccupationTableJiffies.put(occupations.get(i), entry.getValue().get(i));
+                }
+
+                CPUOccupationTablesJiffies.put(key, thisCPUOccupationTableJiffies);
+
+            }
+        }
+
+        return CPUOccupationTablesJiffies;
+    }
+
 
     public void printToStdout() {}
 
