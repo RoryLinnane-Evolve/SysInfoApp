@@ -1,3 +1,12 @@
+/**
+ * This is the file for the server that recieves get requests
+ * from prometheus and responds with the data in the gauges set out below.
+ * The data is set every 4 seconds
+ *
+ * @author Rory Linnane
+ * @version 1.0
+ * */
+
 package ise;
 
 import io.prometheus.client.Counter;
@@ -7,8 +16,6 @@ import ise.SystemMemoryInfo;
 import java.lang.Math;
 
 import java.io.IOException;
-
-
 
 public class MetricServer {
 
@@ -23,30 +30,18 @@ public class MetricServer {
             .help("Free system memory in kilobytes.")
             .register();
 
-    static final Gauge availableMemory = Gauge.build()
-            .name("system_memory_available_kilobytes")
-            .help("Available system memory in kilobytes.")
-            .register();
-
-    static final Gauge buffersMemory = Gauge.build()
-            .name("system_memory_buffers_kilobytes")
-            .help("Buffered system memory in kilobytes.")
-            .register();
-
-    static final Gauge cachedMemory = Gauge.build()
-            .name("system_memory_cached_kilobytes")
-            .help("Cached system memory in kilobytes.")
-            .register();
-
     static final Gauge systemMemoryUsage = Gauge.build()
             .name("system_memory_usage")
             .help("System memory usage percentage.")
             .register();
 
-
+    static final Gauge systemCPUUsage = Gauge.build()
+            .name("system_CPU_usage")
+            .help("CPU usage percentage.")
+            .register();
 
     public static void main(String[] args) throws IOException {
-        // Expose metrics at localhost:8080/metrics
+        // Starts a http server
         HTTPServer server = new HTTPServer(8080);
 
         while (true) {
@@ -57,12 +52,17 @@ public class MetricServer {
                 // Update the Gauges with the current memory info
                 totalMemory.set(mem.total);
                 freeMemory.set(mem.free);
-                availableMemory.set(mem.available);
-                buffersMemory.set(mem.buffers);
-                cachedMemory.set(mem.cached);
+
+                // get the memory usage percentage by dividing the (total memory - available memory) by the total memory and multiplying by 100
                 double memusage = (double)(mem.total-mem.available)/mem.total * 100;
                 systemMemoryUsage.set(Math.round(memusage));
-                Thread.sleep(1000);  // delay 1 second
+
+                //TODO: find cpu usage
+                double cpuUsage = 25;
+                systemCPUUsage.set(cpuUsage);
+
+                // delay 1 second
+                Thread.sleep(4);
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
