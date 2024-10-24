@@ -12,7 +12,9 @@ package ise;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class VirtualFileInfo {
@@ -46,4 +48,21 @@ public class VirtualFileInfo {
 
         this.fileInfo = table;
     }
+}
+
+abstract class VirtualFile<T> {
+    private ArrayList<String> lines;
+
+    public VirtualFile(String fileLocation) {
+        // open and read into array
+    }
+
+    protected List<String> getLines() {
+        return this.lines;
+    }
+
+    public abstract void printToStdout();
+
+    public abstract void sendToMaster(); // can remove this after, here as an idea, doesn't need to be implemented
+
 }
