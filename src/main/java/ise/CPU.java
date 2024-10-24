@@ -60,6 +60,9 @@ class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Integer>>> 
     }
 
     // Returns a table of items that represents time a CPU/core spent at specific tasks in jiffies (1/100th of sec)
+    // for each CPU listed on host machine /proc/stat file there is a table that represents time spent in
+    // userMode, niceMode, systemMode, idleTask, IOWait, IRQ (interrupt request), IOWait (cpu waiting for I/O
+    // operations to complete) and softIRQ.
     public Hashtable<String, Hashtable<String, Long>> getCPUOccupationTablesJiffies() {
         Map<String, List<Long>> KVPs = this.getKVPs();
         Set<Map.Entry<String, List<Long>>> entrySet = KVPs.entrySet();
