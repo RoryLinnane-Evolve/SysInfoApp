@@ -8,7 +8,6 @@ public class CPU {
 
     public static void main(String[] args) throws IOException {
         ProcStatVF stat = new ProcStatVF("/proc/stat");
-        Map<String, List<Integer>> statData = stat.getKVPs();
 
         int dummyInt = 4;
     }
@@ -20,8 +19,8 @@ class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Integer>>> 
     }
 
     // Gets key-value pairs for each line in the virtual file
-    public Map<String, List<Integer>> getKVPs() {
-        Map<String, List<Integer>> KVPs = new HashMap<String, List<Integer>>();
+    private Map<String, List<Long>> getKVPs() {
+        Map<String, List<Long>> KVPs = new HashMap<String, List<Long>>();
 
         List<String> lines = this.getLines();
 
@@ -30,19 +29,31 @@ class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Integer>>> 
             StringTokenizer tokens = new StringTokenizer(line, " ");
 
             if (tokens.hasMoreTokens()) {
-                List<Integer> thisLineValues = new ArrayList<Integer>();
+                List<Long> thisLineValues = new ArrayList<Long>();
                 String thisLineKey = tokens.nextToken();
 
                 while (tokens.hasMoreTokens()) {
                     String value = tokens.nextToken();
                     if (!value.trim().equals("")) {
-                        thisLineValues.add(Integer.parseInt(value));
+                        thisLineValues.add(Long.parseLong(value));
                     }
                 }
                 KVPs.put(thisLineKey, thisLineValues);
             }
         }
         return KVPs;
+    }
+
+    // Get the number of CPUs on the host machine
+    public int getNumCPUs() {
+        Map<String, List<Long>> KVPs = this.getKVPs();
+        int cpuCount = 0;
+        for (String key : KVPs.keySet()) {
+            if (key.startsWith("cpu")) {
+                cpuCount++;
+            }
+        }
+        return cpuCount;
     }
 
     public void printToStdout() {}
