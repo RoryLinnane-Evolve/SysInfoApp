@@ -12,14 +12,10 @@ package ise;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.stream.Stream;
 
-public class VirtualFileInfo<T, K> {
+public class VirtualFileInfo {
     public String fileLocation;
     public VirtualFileInfo(String fileLocation) {
         this.fileLocation = fileLocation;
@@ -44,26 +40,10 @@ public class VirtualFileInfo<T, K> {
             } catch (ArrayIndexOutOfBoundsException e) {
 //                ignoring this exception for now
             } catch (Exception e) {
-                System.out.println(e.getMessage());;
+                System.out.println(e.getMessage());
             }
         });
 
         this.fileInfo = table;
-    }
-
-    public  <T, K> HashMap<?, ?[]> getGenericHashMap() throws IOException {
-        FileReader file = new FileReader(this.fileLocation);
-        BufferedReader reader = new BufferedReader(file);
-        Stream<String> lines = reader.lines();
-
-        HashMap<T, K[]> table = new HashMap<>();
-        lines.forEach(line -> {
-            String[] splitLine = line.split(" ");
-            T key = (T) splitLine[0];
-            K[] value = (K[]) Arrays.copyOfRange(splitLine, 1, splitLine.length);
-            table.put(key, value);
-        });
-
-        return table;
     }
 }
