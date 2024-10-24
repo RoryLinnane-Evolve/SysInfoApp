@@ -53,8 +53,9 @@ public class VirtualFileInfo {
 abstract class VirtualFile<T> {
     private ArrayList<String> lines;
 
-    public VirtualFile(String fileLocation) {
-        // open and read into array
+    public VirtualFile(String fileLocation) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(fileLocation));
+        this.lines = new ArrayList<String>();
     }
 
     protected List<String> getLines() {
