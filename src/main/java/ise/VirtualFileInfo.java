@@ -50,16 +50,27 @@ public class VirtualFileInfo {
     }
 }
 
-abstract class VirtualFile<T> {
+abstract class VirtualFile<T, K> {
     private ArrayList<String> lines;
+    private K data;
 
     public VirtualFile(String fileLocation) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(fileLocation));
         this.lines = new ArrayList<String>();
+        Stream<String> readerLines = reader.lines();
+        readerLines.forEach(line -> {
+            this.lines.add(line);
+        });
     }
 
+    // Returns the lines of the virtual file as List<String>
     protected List<String> getLines() {
         return this.lines;
+    }
+
+    // Returns the data of the file in generic type K
+    protected K getData() {
+        return this.data;
     }
 
     public abstract void printToStdout();
