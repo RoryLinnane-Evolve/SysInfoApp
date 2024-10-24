@@ -63,10 +63,12 @@ abstract class VirtualFile<T, K> {
         });
     }
 
+    // Returns the lines of the virtual file as List<String>
     protected List<String> getLines() {
         return this.lines;
     }
 
+    // Returns the data of the file in generic type K
     protected K getData() {
         return this.data;
     }
