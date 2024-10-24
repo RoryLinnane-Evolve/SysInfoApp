@@ -15,28 +15,28 @@ public class MetricServer {
 
     // Create gauge metrics for system memory properties
     static final Gauge totalMemory = Gauge.build()
-            .name("system_memory_total_bytes")
-            .help("Total system memory in bytes.")
+            .name("system_memory_total_kilobytes")
+            .help("Total system memory in kilobytes.")
             .register();
 
     static final Gauge freeMemory = Gauge.build()
-            .name("system_memory_free_bytes")
-            .help("Free system memory in bytes.")
+            .name("system_memory_free_kilobytes")
+            .help("Free system memory in kilobytes.")
             .register();
 
     static final Gauge availableMemory = Gauge.build()
-            .name("system_memory_available_bytes")
-            .help("Available system memory in bytes.")
+            .name("system_memory_available_kilobytes")
+            .help("Available system memory in kilobytes.")
             .register();
 
     static final Gauge buffersMemory = Gauge.build()
-            .name("system_memory_buffers_bytes")
-            .help("Buffered system memory in bytes.")
+            .name("system_memory_buffers_kilobytes")
+            .help("Buffered system memory in kilobytes.")
             .register();
 
     static final Gauge cachedMemory = Gauge.build()
-            .name("system_memory_cached_bytes")
-            .help("Cached system memory in bytes.")
+            .name("system_memory_cached_kilobytes")
+            .help("Cached system memory in kilobytes.")
             .register();
 
     public static void main(String[] args) throws IOException {
