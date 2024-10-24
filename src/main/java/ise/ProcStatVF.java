@@ -1,22 +1,13 @@
 package ise;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 
-public class CPU {
-    private int numCPUs;
-
-    public static void main(String[] args) throws IOException {
-        ProcStatVF stat = new ProcStatVF("/proc/stat");
-
-        Hashtable<String, Hashtable<String, Long>> CPUOccupationTablesJiffies = stat.getCPUOccupationTablesJiffies();
-
-        int dummyInt = 4;
-    }
-}
-
-class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Integer>>> {
+/**
+ * ProcStatVF is a class that represents the /proc/stat virtual file on many Linux/Unix based systems.
+ * Mostly for CPU/core occupation information and time spent related to interrupts etc.
+ * */
+public class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Integer>>> {
     public ProcStatVF(String fileLocation) throws IOException {
         super(fileLocation);
     }
