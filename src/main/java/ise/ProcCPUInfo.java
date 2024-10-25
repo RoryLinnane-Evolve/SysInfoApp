@@ -1,8 +1,10 @@
 package ise;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -29,36 +31,37 @@ public class ProcCPUInfo extends VirtualFile {
                 continue;
             }
             String[] thisLineStringValues = line.split(":");
-            try {
-                String thisLineKey = thisLineStringValues[0].trim();
-                Object thisLineValue = thisLineStringValues[1].trim();
+            String thisLineKey = thisLineStringValues[0].trim();
+            String thisLineValueUnconverted = thisLineStringValues[1].trim();
 
-                switch (thisLineStringValues[1].trim()) {
-                    case "yes":
-                        thisLineValue = true;
-                        break;
-                    case "no":
-                        thisLineValue = false;
-                        break;
-                    default:
-                        if (thisLineStringValues[1].trim().endsWith(" KB")) {
-                            thisLineValue = thisLineStringValues[1].trim().substring(0, thisLineStringValues[1].trim().length() - 3);
-                        } else if (thisLineKey == "flags" | thisLineKey == "bugs" | thisLineKey == "vmx flags") {
-                            thisLineValue = thisLineStringValues[1].trim().split("\\s+");
-                        } else {
-                            try {
-                                thisLineValue = Integer.parseInt(thisLineStringValues[1].trim());
-                            } catch (NumberFormatException e) {
-                                thisLineValue = thisLineStringValues[1].trim();
-                            }
-                        }
-                }
-                thisCPU.put(thisLineKey, thisLineValue);
-            } catch (IndexOutOfBoundsException e) {
-                thisCPU.put(thisLineStringValues[0].trim(), "");
-            }
         }
         return KVPs;
+    }
+
+    private Object convertToAptType(String key, String value) {
+        key.trim(); value.trim();
+        Object valueReturn = value;
+
+        if (value == "yes") {
+            valueReturn = true;
+        } else if (value == "no") {
+            valueReturn = false;
+        } else if (key == "microcode") {
+            valueReturn = Long.parseLong(value);
+        } else if (key == "flags" || key == "vmx flags" || key == "bugs") {
+            valueReturn = (String[]) value.split(" ");
+        } else if (key == "address sizes") {
+            String[] splitVal = value.split(", ");
+            Integer bitsPhysical = Integer.parseInt(splitVal[0].replace(" bits physical", ""));
+            Integer bitsVirtual = Integer.parseInt(splitVal[1].replace(" bits virtual", ""));
+            valueReturn = new Hashtable<String, Integer>(2);
+            ((Hashtable<String, Integer>) valueReturn).put("bitsPhysical", bitsPhysical);
+            ((Hashtable<String, Integer>) valueReturn).put("bitsVirtual", bitsVirtual);
+        } else {
+            valueReturn = Integer.parseInt(value);
+        }
+
+        return valueReturn;
     }
 
     /**
