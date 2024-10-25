@@ -17,7 +17,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class VirtualFileInfo {
+class VirtualFileInfo {
     public String fileLocation;
     public VirtualFileInfo(String fileLocation) {
         this.fileLocation = fileLocation;
