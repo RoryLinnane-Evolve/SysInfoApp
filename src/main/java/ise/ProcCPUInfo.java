@@ -45,34 +45,7 @@ public class ProcCPUInfo extends VirtualFile {
         String value = valueUnconverted.trim();
         Object valueReturn = value;
 
-        if (value == "yes") {
-            valueReturn = true;
-        } else if (value == "no") {
-            valueReturn = false;
-        } else if (key == "microcode") {
-            valueReturn = Long.parseLong(value, 16);
-        } else if (key == "flags" || key == "vmx flags" || key == "bugs") {
-            valueReturn = (String[]) value.split(" ");
-        } else if (key == "address sizes") {
-            String[] splitVal = value.split(", ");
-            Integer bitsPhysical = Integer.parseInt(splitVal[0].replace(" bits physical", ""));
-            Integer bitsVirtual = Integer.parseInt(splitVal[1].replace(" bits virtual", ""));
-            valueReturn = new Hashtable<String, Integer>(2);
-            ((Hashtable<String, Integer>) valueReturn).put("bitsPhysical", bitsPhysical);
-            ((Hashtable<String, Integer>) valueReturn).put("bitsVirtual", bitsVirtual);
-        } else if (value.endsWith(" KB")) {
-            valueReturn = Long.parseLong(value.substring(0, value.length() - 3));
-        } else {
-            try {
-                valueReturn = Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-                try {
-                    valueReturn = Double.parseDouble(valueUnconverted);
-                } catch (NumberFormatException e2) {
-                    // ignore err
-                }
-            }
-        }
+
 
         return valueReturn;
     }
