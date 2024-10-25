@@ -13,7 +13,7 @@ public class ProcCPUInfo extends VirtualFile {
         ProcCPUInfo procCPUInfo = new ProcCPUInfo("/proc/cpuinfo");
         ArrayList<Hashtable<String, Object>> KVPs = procCPUInfo.getStringKVPs();
 
-        int dummyInt = 3;
+        System.out.println(KVPs);
     }
 
     public ProcCPUInfo(String filePath) throws IOException {
@@ -26,20 +26,23 @@ public class ProcCPUInfo extends VirtualFile {
         Hashtable<String, Object> thisCPU = new Hashtable<String, Object>();
 
         for (String line : lines) {
-            if (line.isEmpty()) {
+            if (line.isEmpty() || line.startsWith("power management")) {
                 KVPs.add(thisCPU);
                 continue;
             }
             String[] thisLineStringValues = line.split(":");
-            String thisLineKey = thisLineStringValues[0].trim();
-            String thisLineValueUnconverted = thisLineStringValues[1].trim();
+            String thisLineKey = thisLineStringValues[0];
+            String thisLineValueUnconverted = thisLineStringValues[1];
+            Object thisLineValueConverted = convertToAptType(thisLineKey, thisLineValueUnconverted);
 
+            thisCPU.put(thisLineKey, thisLineValueConverted);
         }
         return KVPs;
     }
 
-    private Object convertToAptType(String key, String value) {
-        key.trim(); value.trim();
+    private Object convertToAptType(String keyUnconverted, String valueUnconverted) {
+        String key = keyUnconverted.trim();
+        String value = valueUnconverted.trim();
         Object valueReturn = value;
 
         if (value == "yes") {
@@ -47,7 +50,7 @@ public class ProcCPUInfo extends VirtualFile {
         } else if (value == "no") {
             valueReturn = false;
         } else if (key == "microcode") {
-            valueReturn = Long.parseLong(value);
+            valueReturn = Long.parseLong(value, 16);
         } else if (key == "flags" || key == "vmx flags" || key == "bugs") {
             valueReturn = (String[]) value.split(" ");
         } else if (key == "address sizes") {
@@ -57,8 +60,18 @@ public class ProcCPUInfo extends VirtualFile {
             valueReturn = new Hashtable<String, Integer>(2);
             ((Hashtable<String, Integer>) valueReturn).put("bitsPhysical", bitsPhysical);
             ((Hashtable<String, Integer>) valueReturn).put("bitsVirtual", bitsVirtual);
+        } else if (value.endsWith(" KB")) {
+            valueReturn = Long.parseLong(value.substring(0, value.length() - 3));
         } else {
-            valueReturn = Integer.parseInt(value);
+            try {
+                valueReturn = Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                try {
+                    valueReturn = Double.parseDouble(valueUnconverted);
+                } catch (NumberFormatException e2) {
+                    // ignore err
+                }
+            }
         }
 
         return valueReturn;
