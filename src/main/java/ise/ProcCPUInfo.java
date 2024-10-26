@@ -1,12 +1,7 @@
 package ise;
 
 import java.io.*;
-import java.lang.reflect.Array;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 public class ProcCPUInfo extends VirtualFile {
     public static void main(String[] args) throws IOException {
@@ -31,122 +26,98 @@ public class ProcCPUInfo extends VirtualFile {
                 continue;
             }
             String[] thisLineStringValues = line.split(":");
-            String thisLineKey = thisLineStringValues[0];
+            String thisLineKey = thisLineStringValues[0].trim();
             String thisLineValueUnconverted = thisLineStringValues[1];
-            Object thisLineValueConverted = convertToAptType(thisLineKey, thisLineValueUnconverted);
-
-            thisCPU.put(thisLineKey, thisLineValueConverted);
+            ConvertToAptType typeConverter = new ConvertToAptType();
+            Hashtable<String, Object> convertedKVP = typeConverter.convertKeyAndValue(thisLineKey, thisLineValueUnconverted);
         }
         return KVPs;
     }
 
-    private Object convertToAptType(String keyUnconverted, String valueUnconverted) {
-        String key = keyUnconverted.trim();
-        String value = valueUnconverted.trim();
-        Object valueReturn = value;
+    private class ConvertToAptType {
+        private Set<String> parseIntItems = new HashSet<String>();
+        private Set<String> parseBooleanFromYesNoItems = new HashSet<String>();
+        private Set<String> splitOnSpaceItems = new HashSet<String>();
+        private Set<String> parseDoubleItems = new HashSet<String>();
+        private final List<String> parseIntItemsList = Arrays.asList("processor", "cpu family", "model", "stepping", "physical id", "siblings", "core id", "cpu cores", "apicid", "initial apicid", "cpuid level","cflush size", "cache_alignment");
+        private final List<String> parseBooleanFromYesNoItemsList = Arrays.asList("fpu", "fpu_exception", "wp");
+        private final List<String> splitOnSpaceItemsList = Arrays.asList("flags", "vmx flags", "bugs");
+        private final List<String> parseDoubleItemsList = Arrays.asList("cpu MHz", "bogomips");
 
-//        System.out.println("case \"" + key + "\":");
-//        System.out.println("    break;");
-
-        switch (key) {
-            case "processor":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "vendor_id":
-                valueReturn = value.trim();
-                break;
-            case "cpu family":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "model":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "model name":
-                valueReturn = value.trim();
-                break;
-            case "stepping":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "microcode":
-                valueReturn = Long.decode(value);
-                break;
-            case "cpu MHz":
-                valueReturn = Double.parseDouble(value);
-                break;
-            case "cache size":
-                valueReturn = Integer.parseInt(value.replace(" KB", ""));
-                break;
-            case "physical id":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "siblings":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "core id":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "cpu cores":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "apicid":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "initial apicid":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "fpu":
-                if (value == "yes"){
-                    valueReturn = true;
-                } else {
-                    valueReturn = false;
-                }
-                break;
-            case "fpu_exception":
-                if (value == "yes"){
-                    valueReturn = true;
-                } else {
-                    valueReturn = false;
-                }
-                break;
-            case "cpuid level":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "wp":
-                if (value == "yes"){
-                    valueReturn = true;
-                } else {
-                    valueReturn = false;
-                }
-                break;
-            case "flags":
-                valueReturn = value.split(" ");
-                break;
-            case "vmx flags":
-                valueReturn = value.split(" ");
-                break;
-            case "bugs":
-                valueReturn = value.split(" ");
-                break;
-            case "bogomips":
-                valueReturn = Double.parseDouble(value);
-                break;
-            case "clflush size":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "cache_alignment":
-                valueReturn = Integer.parseInt(value);
-                break;
-            case "address sizes":
-                String[] splitLine = value.split(", ");
-                Integer bitsPhysical = Integer.parseInt(splitLine[0].replace(" bits physical", ""));
-                Integer bitsVirtual = Integer.parseInt(splitLine[1].replace(" bits virtual", ""));
-                valueReturn = new Hashtable<String, Integer>();
-                ((Hashtable<String, Integer>) valueReturn).put("bitsPhysical", bitsPhysical);
-                ((Hashtable<String, Integer>) valueReturn).put("bitsVirtual", bitsVirtual);
-                break;
+        ConvertToAptType() {
+            for (String item: parseIntItemsList) {
+                parseIntItems.add(item);
+            }
+            for (String item: parseBooleanFromYesNoItemsList) {
+                parseBooleanFromYesNoItems.add(item);
+            }
+            for (String item: splitOnSpaceItemsList) {
+                splitOnSpaceItems.add(item);
+            }
+            for (String item: parseDoubleItemsList) {
+                parseDoubleItems.add(item);
+            }
         }
 
-        return valueReturn;
+        public Hashtable<String, Object> convertKeyAndValue(String key, String value) {
+            String trimmedKey = key.trim(); value = value.trim();
+            String returnKey = ""; Object returnValue = null;
+
+            if (parseIntItems.contains(trimmedKey)) {
+                returnValue = KeyValueOperation.PARSE_INT.apply(value);
+            } else if (parseBooleanFromYesNoItems.contains(trimmedKey)) {
+                returnValue = KeyValueOperation.PARSE_BOOLEAN_FROM_YES_NO.apply(value);
+            } else if (parseDoubleItems.contains(trimmedKey)) {
+                returnValue = KeyValueOperation.PARSE_DOUBLE.apply(value);
+            } else if (splitOnSpaceItems.contains(trimmedKey)) {
+                returnValue = KeyValueOperation.SPLIT_ON_SPACE.apply(value);
+            } else if (parseDoubleItems.contains(trimmedKey)) {
+                returnValue = KeyValueOperation.PARSE_DOUBLE.apply(value);
+            } else {
+                System.out.println("Unknown key: " + trimmedKey);
+            }
+
+            Hashtable<String, Object> returnTable = new Hashtable<String, Object>();
+            returnTable.put(key, returnValue);
+            return returnTable;
+        }
+
+        @FunctionalInterface
+        private interface KeyValueOperationInterface {
+            Object apply(String stringToConvert);
+        }
+
+        private enum KeyValueOperation implements KeyValueOperationInterface {
+            PARSE_INT {
+                public Integer apply(String stringToConvert) {
+                    return Integer.parseInt(stringToConvert);
+                }
+            },
+            PARSE_BOOLEAN_FROM_YES_NO {
+                public Boolean apply(String stringToConvert) {
+                    if (stringToConvert.equalsIgnoreCase("yes")) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            },
+            SPLIT_ON_SPACE {
+                public String[] apply(String stringToConvert) {
+                    return stringToConvert.split(" ");
+                }
+            },
+            PARSE_DOUBLE {
+                public Double apply(String stringToConvert) {
+                    return Double.parseDouble(stringToConvert);
+                }
+            },
+            UNKNOWN_KEY {
+                public Error apply(String stringToConvert) {
+                    return new Error("Unknown key: " + stringToConvert);
+                }
+            }
+        }
     }
 
     /**
