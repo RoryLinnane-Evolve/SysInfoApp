@@ -6,23 +6,23 @@ import java.util.*;
 public class ProcCPUInfo extends VirtualFile {
     public static void main(String[] args) throws IOException {
         ProcCPUInfo procCPUInfo = new ProcCPUInfo("/proc/cpuinfo");
-        ArrayList<Hashtable<String, Object>> KVPs = procCPUInfo.getStringKVPs();
+        ArrayList<Hashtable<String, Object>> CPUs = procCPUInfo.getCPUs();
 
-        System.out.println(KVPs);
+        System.out.println(CPUs);
     }
 
     public ProcCPUInfo(String filePath) throws IOException {
         super(filePath);
     };
 
-    public ArrayList<Hashtable<String, Object>> getStringKVPs() {
-        ArrayList<Hashtable<String, Object>> KVPs = new ArrayList<Hashtable<String, Object>>();
+    public ArrayList<Hashtable<String, Object>> getCPUs() {
+        ArrayList<Hashtable<String, Object>> CPUs = new ArrayList<Hashtable<String, Object>>();
         List<String> lines = getLines();
         Hashtable<String, Object> thisCPU = new Hashtable<String, Object>();
 
         for (String line : lines) {
             if (line.isEmpty() || line.startsWith("power management")) {
-                KVPs.add(thisCPU);
+                CPUs.add(thisCPU);
                 continue;
             }
             String[] thisLineStringValues = line.split(":");
@@ -30,11 +30,12 @@ public class ProcCPUInfo extends VirtualFile {
             String thisLineValueUnconverted = thisLineStringValues[1];
             ConvertToAptType typeConverter = new ConvertToAptType();
             Hashtable<String, Object> convertedKVP = typeConverter.convertKeyAndValue(thisLineKey, thisLineValueUnconverted);
+            thisCPU.put((String) convertedKVP.get(0), convertedKVP.get(1));
         }
-        return KVPs;
+        return CPUs;
     }
 
-    private class ConvertToAptType {
+    private  class ConvertToAptType {
         private Set<String> parseIntItems = new HashSet<String>();
         private Set<String> parseBooleanFromYesNoItems = new HashSet<String>();
         private Set<String> splitOnSpaceItems = new HashSet<String>();
@@ -118,20 +119,6 @@ public class ProcCPUInfo extends VirtualFile {
                 }
             }
         }
-    }
-
-    /**
-     * Creates a CPU from the lines of a /proc/cpuinfo file
-     * @returns CPU
-     * */
-    private Hashtable<String, Object> parseCPUDataFromLines() {
-        List<String> lines = this.getLines();
-        Hashtable<String, Object> thisCPU = new Hashtable<>();
-        for (String line : lines) {
-            System.out.println(line);
-        }
-
-        return thisCPU;
     }
 
     public void printToStdout() {}
