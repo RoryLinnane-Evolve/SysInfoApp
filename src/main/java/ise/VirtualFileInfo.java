@@ -12,9 +12,9 @@ package ise;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
+import java.lang.reflect.Type;
+import java.sql.Array;
+import java.util.*;
 import java.util.stream.Stream;
 
 class VirtualFileInfo {
@@ -47,6 +47,72 @@ class VirtualFileInfo {
         });
 
         this.fileInfo = table;
+    }
+
+    class KVPParser {
+        private HashMap<String, VFStringValueOperation> conversionMap = new HashMap<String, VFStringValueOperation>();
+        private ArrayList<String> lines = new ArrayList<String>();
+
+        public void addConversion(List<String> keys, VFStringValueOperation conversionOperation) {
+            for (String key : keys) {
+                conversionMap.put(key, conversionOperation);
+            }
+        }
+
+        public void run(String delimiter) {
+            for (String line: lines) {
+                Integer keyIndex = line.indexOf(delimiter);
+                String key = line.substring(0, keyIndex);
+                String value = line.substring(delimiter.length() - keyIndex);
+                VFStringValueOperation conversionOperation = conversionMap.get(key);
+                if (conversionOperation != null) {
+                    conversionOperation.apply(value);
+                }
+            }
+        }
+
+        @FunctionalInterface
+        public interface VFStringValueOperationsInterface {
+            Object apply(String stringToConvert);
+        }
+
+        public enum VFStringValueOperation implements VFStringValueOperationsInterface  {
+            PARSE_INT {
+                public Integer apply(String stringToConvert) {
+                    return Integer.parseInt(stringToConvert);
+                }
+            },
+            PARSE_BOOLEAN_FROM_YES_NO {
+                public Boolean apply(String stringToConvert) {
+                    if (stringToConvert.equalsIgnoreCase("yes")) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            },
+            SPLIT_ON_SPACE {
+                public String[] apply(String stringToConvert) {
+                    return stringToConvert.split(" ");
+                }
+            },
+            PARSE_DOUBLE {
+                public Double apply(String stringToConvert) {
+                    return Double.parseDouble(stringToConvert);
+                }
+            },
+            TRIM_STRING {
+                public String apply(String stringToConvert) {
+                    return stringToConvert.trim();
+                }
+            },
+            POP_3_CHARS_RETURN_INT {
+                public Integer apply(String stringToConvert) {
+                    String stringInt = stringToConvert.substring(0, stringToConvert.length() -3);
+                    return Integer.parseInt(stringInt);
+                }
+            }
+        }
     }
 }
 
