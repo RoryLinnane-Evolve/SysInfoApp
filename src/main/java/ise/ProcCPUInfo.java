@@ -21,16 +21,17 @@ public class ProcCPUInfo extends VirtualFile {
         Hashtable<String, Object> thisCPU = new Hashtable<String, Object>();
 
         for (String line : lines) {
-            if (line.isEmpty() || line.startsWith("power management")) {
+            if (line.trim() == "" || line.startsWith("power management") || line.startsWith("address sizes")) {
                 CPUs.add(thisCPU);
                 continue;
             }
             String[] thisLineStringValues = line.split(":");
             String thisLineKey = thisLineStringValues[0].trim();
-            String thisLineValueUnconverted = thisLineStringValues[1];
+            System.out.println(line);
+            String thisLineValueUnconverted = "";
             ConvertToAptType typeConverter = new ConvertToAptType();
             Hashtable<String, Object> convertedKVP = typeConverter.convertKeyAndValue(thisLineKey, thisLineValueUnconverted);
-            thisCPU.put((String) convertedKVP.get(0), convertedKVP.get(1));
+            thisCPU.put((String) thisLineKey, convertedKVP.get(thisLineKey));
         }
         return CPUs;
     }
@@ -40,10 +41,12 @@ public class ProcCPUInfo extends VirtualFile {
         private Set<String> parseBooleanFromYesNoItems = new HashSet<String>();
         private Set<String> splitOnSpaceItems = new HashSet<String>();
         private Set<String> parseDoubleItems = new HashSet<String>();
-        private final List<String> parseIntItemsList = Arrays.asList("processor", "cpu family", "model", "stepping", "physical id", "siblings", "core id", "cpu cores", "apicid", "initial apicid", "cpuid level","cflush size", "cache_alignment");
+        private Set<String> trimOnlyItems = new HashSet<String>();
+        private final List<String> parseIntItemsList = Arrays.asList("clflush size", "cache alignment", "processor", "cpu family", "model", "stepping", "physical id", "siblings", "core id", "cpu cores", "apicid", "initial apicid", "cpuid level","cflush size", "cache_alignment");
         private final List<String> parseBooleanFromYesNoItemsList = Arrays.asList("fpu", "fpu_exception", "wp");
         private final List<String> splitOnSpaceItemsList = Arrays.asList("flags", "vmx flags", "bugs");
         private final List<String> parseDoubleItemsList = Arrays.asList("cpu MHz", "bogomips");
+        private final List<String> tromOnlyItemsList = Arrays.asList("vendor_id", "model name", "microcode");
 
         ConvertToAptType() {
             for (String item: parseIntItemsList) {
@@ -57,6 +60,9 @@ public class ProcCPUInfo extends VirtualFile {
             }
             for (String item: parseDoubleItemsList) {
                 parseDoubleItems.add(item);
+            }
+            for (String item: tromOnlyItemsList) {
+                trimOnlyItems.add(item);
             }
         }
 
@@ -72,10 +78,20 @@ public class ProcCPUInfo extends VirtualFile {
                 returnValue = KeyValueOperation.PARSE_DOUBLE.apply(value);
             } else if (splitOnSpaceItems.contains(trimmedKey)) {
                 returnValue = KeyValueOperation.SPLIT_ON_SPACE.apply(value);
-            } else if (parseDoubleItems.contains(trimmedKey)) {
-                returnValue = KeyValueOperation.PARSE_DOUBLE.apply(value);
+            } else if (trimOnlyItems.contains(trimmedKey)) {
+                returnValue = KeyValueOperation.TRIM_STRING.apply(value);
             } else {
-                System.out.println("Unknown key: " + trimmedKey);
+                switch (key) {
+                    case "cache size":
+                        String stringInt = value.replace(" KB", "");
+                        returnValue =  Long.parseLong(stringInt);
+                        break;
+                    case "cpu MHz":
+                        returnValue = Float.parseFloat(value);
+                    default:
+                        System.out.println("Unknown key: " + key);
+                        break;
+                }
             }
 
             Hashtable<String, Object> returnTable = new Hashtable<String, Object>();
@@ -116,6 +132,16 @@ public class ProcCPUInfo extends VirtualFile {
             UNKNOWN_KEY {
                 public Error apply(String stringToConvert) {
                     return new Error("Unknown key: " + stringToConvert);
+                }
+            }, TRIM_STRING {
+                public String apply(String stringToConvert) {
+                    return stringToConvert.trim();
+                }
+            }, TRIM_KB_RETURN_INT {
+                public Integer apply(String stringToConvert) {
+                    String stringInt = stringToConvert.split(" ")[0];
+                    System.out.println(stringInt);
+                    return Integer.parseInt(stringInt);
                 }
             }
         }
