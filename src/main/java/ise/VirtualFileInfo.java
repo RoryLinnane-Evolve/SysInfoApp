@@ -190,6 +190,11 @@ class KVPParser {
                 }
                 return processedVal.toArray(new Integer[processedVal.size()]);
             }
+        },
+        PARSE_LONG {
+            public Long apply(String unprocessedVal) {
+                return Long.parseLong(unprocessedVal);
+            }
         }
     }
 
