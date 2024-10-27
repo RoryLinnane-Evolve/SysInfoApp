@@ -48,11 +48,10 @@ public class VirtualFileInfo {
     }
 
     /**
-     * Creates a resulting information object of shape T.
-     * Add reusable KVPParser.conversionOperations or create your own with ConversionOperation interface.
+     * KVPParser class can be used to create a parser for virtual files that exhibit key-value pair format.
      * */
-    class KVPParser<T> {
-        private HashMap<String, ConversionOperation> conversionMap = new HashMap<String, ConversionOperation>();
+    class KVPParser {
+        private HashMap<String, ConversionOperation> keyValueConversionOperationMap = new HashMap<String, ConversionOperation>();
         private ArrayList<String> lines = new ArrayList<String>();
         private Hashtable<String, Object> processedKVPs = new Hashtable<String, Object>();
 
@@ -64,7 +63,7 @@ public class VirtualFileInfo {
          * */
         public void addConversion(List<String> keys, ConversionOperation conversionOperation) {
             for (String key : keys) {
-                conversionMap.put(key, conversionOperation);
+                keyValueConversionOperationMap.put(key, conversionOperation);
             }
         }
 
@@ -74,14 +73,14 @@ public class VirtualFileInfo {
          * @return The processed key-value pairs in form Hashtable<String, Object>
          * */
         public Hashtable<String, Object> process(String split) {
-            for (String line: lines) {
+            for (String line: lines) { // process every line in file
                 Integer keyIndex = line.indexOf(split);
                 String key = line.substring(0, keyIndex);
                 String value = line.substring(line.length() - keyIndex);
-                ConversionOperation conversionOperation = conversionMap.get(key);
+                ConversionOperation conversionOperation = keyValueConversionOperationMap.get(key); // get appropriate ConversionOperation for key's corresponding values
                 if (conversionOperation != null) {
                     Object returnedValue = conversionOperation.apply(value);
-                    processedKVPs.put(key, returnedValue);
+                    processedKVPs.put(key, returnedValue); // add key and processed values to processedKVPs Hashtable
                 }
             }
             return processedKVPs;
