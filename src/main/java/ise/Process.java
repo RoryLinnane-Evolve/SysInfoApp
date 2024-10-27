@@ -21,9 +21,8 @@ enum ProcState {
  * in bash
  * */
 public class Process {
-    private static final List<String> trimOnlyItemsList = Arrays.asList("Name", "Speculation_Store_Bypass", "SpeculationIndirectBranch", "Cpus_allowed");
-    private static final List<String> popThreeCharsReturnIntList = Arrays.asList("VmPeak", "VmSize", "VmLck", "VmPin", "VmHWM", "VmRSS", "RssAnon", "RssFile", "RssShmem", "VmData", "VmStk", "VmExe", "VmLib", "VmPTE", "VmSwap", "HugetlbPages");
-
+    private final List<String> trimOnlyItemsList = Arrays.asList("Name", "Speculation_Store_Bypass", "SpeculationIndirectBranch", "Cpus_allowed");
+    private final List<String> popThreeCharsReturnIntList = Arrays.asList("VmPeak", "VmSize", "VmLck", "VmPin", "VmHWM", "VmRSS", "RssAnon", "RssFile", "RssShmem", "VmData", "VmStk", "VmExe", "VmLib", "VmPTE", "VmSwap", "HugetlbPages");
 
     private static ConversionOperation processProcState = (state -> {
         ProcState stateToReturn = null;
