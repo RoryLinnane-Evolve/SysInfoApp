@@ -11,7 +11,11 @@ package ise;
 import java.io.IOException;
 
 enum ProcState {
-    RUN, SLEEP, UNINTERRUPTABLE_SLEEP, STOPPED, ZOMBIE
+    RUN,
+    SLEEP,
+    UNINTERRUPTABLE_SLEEP,
+    STOPPED,
+    ZOMBIE
 }
 
 /**
@@ -39,8 +43,14 @@ public class Process {
 
     private void setProcessInfoFromPID(int pid) throws IOException {
         String stringProcessID = Integer.toString(pid);
-        VirtualFileInfo statusInfo = new VirtualFileInfo("/proc/" + stringProcessID + "/status");
-        statusInfo.setHashtable();
+        VirtualFileInfo statusInfo = null;
+        try {
+            statusInfo = new VirtualFileInfo("/proc/" + stringProcessID + "/status");
+            statusInfo.setHashtable();
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return;
+        }
         this.name = (String) statusInfo.fileInfo.get("Name");
         this.pid = Integer.parseInt(statusInfo.fileInfo.get("Pid").toString());
         this.ppid = Integer.parseInt(statusInfo.fileInfo.get("PPid").toString());
@@ -91,4 +101,9 @@ public class Process {
     public int getNiceness() {
         return niceness;
     }
+
+    public String getName() {
+        return name;
+    }
+    public String getState() { return state.toString(); }
 }
