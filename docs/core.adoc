@@ -18,17 +18,101 @@ interface SysinfoInterface {
 }
 ----
 
-=== ProcessInfo
+=== VirtualFileInfo
 
-==== Properties
-Reads the /proc/<pid>/status virtual file to return a class with properties such as
+This class is used for all other info classes. It provides an API to create virtual file parsers.
 
-- _name_ (the name of the process)
-- _pid_ (the process ID number)
-- _ppid_ (the pid of this process' parent)
-- _state_ (the state of the process, which can be one of 5 process states: _RUN_, _SLEEP_, _UNINTERRUPTABLE_SLEEP_, _STOPPED_, _ZOMBIE_)
+=== VirtualFileInfo.KVPParser
+
+Class is used to create a key-value pair parser. This is applicable for parsing files such as `/proc/cpuinfo`.
+
+Non-static methods (listed below) are used to build out the parser after instantiation with custom configuration. The basic workflow/usage of the API for this class involved providing a list of keys (`List<String>`) which require a common type conversion function (<<ConversionOperation-Interface, see docs for ConversionOperation interface>>) that they need (<<VirtualFileInfo-KVPParser-example-usage, see example usage>>).
+
+==== Interfaces
+[#ConversionOperation-Interface]
+===== ConversionOperation
+
+[source, java]
+----
+@FunctionalInterface
+public interface ConversionOperation {
+    Object apply(String stringToConvert);
+}
+----
+
+==== Enums
+
+===== premadeConversionOperation
+[source, java]
+----
+public enum premadeConversionOperation implements ConversionOperation
+----
+
+Implements ConversionOperation functional interface, thus contains only functions that exhibit ConveresionOperation parameters and return typing.
+
+These functions include:
+
+`_PARSE_INT_`: Given a string, will parse an integer +
+`_BOOLEAN_FROM_YES_NO_`: returns true if input="yes", returns false if input="no" +
+`_SPLIT_ON_SPACE_`: returns String[] via input.split(" "") +
+`_PARSE_DOUBLE_`: Given string will parse double +
+`_TRIM_STRING_`: Trims inputted string +
+`_POP_3_CHARS_RETURN_INT_`: Removes last 3 chars from string then parses integer from resulting string.
 
 ==== Methods
 
-Has methods to get global system information, such as the PIDs of all running processes on the host:
+===== addConversion()
 
+....
+void addConversion(List<String> keys, ConversionOperation conversionOpertation);
+....
+
+This non-static method adds a list of keys and their common corresponding conversions to the parser.
+
+===== run()
+
+[source, java]
+----
+void run(String split); // 'split' specifies the substring that separates the key and value
+----
+
+After you have defined your KVPParser with addConversion() methods, run it on your specified file.
+
+[#VirtualFileInfo-KVPParser-example-usage]
+===== Example Usage
+
+====== With builtin conversion methods
+
+_For the following imaginary file below:_
+
+[source, text]
+----
+model_name: AMD Ryzen 9
+core_count: 12
+cpu_mhz: 2223.456
+clflush_size: 64
+cache_alignment: 64
+----
+
+Code to parse the above file to appropriate datatypes.
+
+[source,java]
+----
+import ise.VirtualFileInfo;import java.util.ArrayList;
+
+public class ExampleKVPParser {
+    public static void main(String[] args) {
+        // initialize parser object
+        KVPParser exampleKVPParser = new KVPParser();
+
+        // initialize key lists and their corresponding conversions.
+        List<String> intValues = new ArrayList<String>("core_count", "clflush_size", "cache_alignment");
+        List<String> doubleValues = new ArrayList<String>("cpu_mhz");
+        List<String> trimValues = new ArrayList<String>("model_name")
+
+        exampleKVPParser.addConversion(intValues, premadeConversionOperation.PARSE_INT);
+        exampleKVPParser.addConversion(doubleValues, premadeConversionOperation.PARSE_DOUBLE);
+        exampleKVPParser.addConversion(trimValues, premadeConversionOperation.TRIM_STRIMG);
+    }
+}
+----

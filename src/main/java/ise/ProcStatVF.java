@@ -7,7 +7,7 @@ import java.util.*;
  * ProcStatVF is a class that represents the /proc/stat virtual file on many Linux/Unix based systems.
  * Mostly for CPU/core occupation information and time spent related to interrupts etc.
  * */
-public class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Integer>>> {
+public class ProcStatVF extends VirtualFile {
     public ProcStatVF(String fileLocation) throws IOException {
         super(fileLocation);
     }
@@ -78,9 +78,4 @@ public class ProcStatVF extends VirtualFile<List<Integer>, Map<String, List<Inte
 
         return CPUOccupationTablesJiffies;
     }
-
-
-    public void printToStdout() {}
-
-    public void sendToMaster() {}
 }

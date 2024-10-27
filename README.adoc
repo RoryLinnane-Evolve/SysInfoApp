@@ -1,4 +1,4 @@
-= host-info-agent
+= SysInfoApp
 :toc:
 
 This is the documentation for the host-info-agent (core) of the project. This component is the basis of all project extensions such as CLI tools.
