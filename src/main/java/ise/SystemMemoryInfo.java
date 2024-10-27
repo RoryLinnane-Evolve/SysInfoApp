@@ -22,11 +22,11 @@ public class SystemMemoryInfo {
     private void setMemInfo() throws IOException {
         VirtualFileInfo meminfo = new VirtualFileInfo("/proc/meminfo");
         meminfo.setHashtable();
-        this.total = trimAndCastToInt(meminfo.fileInfo.get("MemTotal"), "kB");
-        this.free = trimAndCastToInt(meminfo.fileInfo.get("MemFree"), "kB");
-        this.available = trimAndCastToInt(meminfo.fileInfo.get("MemAvailable"), "kB");
-        this.buffers = trimAndCastToInt(meminfo.fileInfo.get("Buffers"), "kB");
-        this.cached = trimAndCastToInt(meminfo.fileInfo.get("Cached"), "kB");
+        this.total = trimAndCastToInt((String) meminfo.fileInfo.get("MemTotal"), "kB");
+        this.free = trimAndCastToInt((String) meminfo.fileInfo.get("MemFree"), "kB");
+        this.available = trimAndCastToInt((String) meminfo.fileInfo.get("MemAvailable"), "kB");
+        this.buffers = trimAndCastToInt((String) meminfo.fileInfo.get("Buffers"), "kB");
+        this.cached = trimAndCastToInt((String) meminfo.fileInfo.get("Cached"), "kB");
     }
 
     /**

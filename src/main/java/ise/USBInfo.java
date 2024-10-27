@@ -49,7 +49,7 @@ public class USBInfo {
 
     private static int getCountFromCommand(String command, String startsWith) {
         try {
-            Process process = Runtime.getRuntime().exec(command);
+            java.lang.Process process = Runtime.getRuntime().exec(command);
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             long count = reader.lines()
                     .filter(line -> line.contains(startsWith))
@@ -63,7 +63,7 @@ public class USBInfo {
 
     private static String getIDFromCommand(String command, String idType) {
         try {
-            Process process = Runtime.getRuntime().exec(command);
+            java.lang.Process process = Runtime.getRuntime().exec(command);
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             return reader.lines()
                     .filter(line -> line.contains(idType))

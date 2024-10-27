@@ -48,7 +48,7 @@ public class VirtualFileInfo<T, K> {
 
         this.fileInfo = table;
     }
-
+/*
     public  <T, K> HashMap<?, ?[]> getGenericHashMap() throws IOException {
         FileReader file = new FileReader(this.fileLocation);
         BufferedReader reader = new BufferedReader(file);
@@ -62,6 +62,6 @@ public class VirtualFileInfo<T, K> {
             table.put(key, value);
         });
 
-        return table;
+        return table; */
     }
-}
+    // }
