@@ -1,18 +1,6 @@
-/**
- * This will query a virtual file (basing the directory structure on standard Ubuntu directory
- * structure) and return the results found as a hashtable, where the key value pairs are
- * derived using a colon as a delimiter.
- *
- * @author Mikey Fennelly
- * @version 2.0
- * */
-
 package ise;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -49,13 +37,26 @@ public class VirtualFileInfo {
     }
 }
 
+class KVP {
+    private Object value = null;
+    private String key = null;
+    public KVP(Object value, String key) {
+        this.value = value;
+        this.key = key;
+    }
+    public Object getValue() {return value;}
+    public String getKey() {return key;}
+    public void setValue(Object value) {this.value = value;}
+    public void setKey(String key) {this.key = key;}
+
+}
+
 /**
  * KVPParser class can be used to create a parser for virtual files that exhibit key-value pair format.
  * */
 class KVPParser {
     private HashMap<String, ConversionOperation> keyValueConversionOperationMap = new HashMap<String, ConversionOperation>();
     private ArrayList<String> lines = new ArrayList<String>();
-    private Hashtable<String, Object> processedKVPs = new Hashtable<String, Object>();
 
     /**
      * Method is used to configure KVPParser based on the behaviour of a virtual file.
@@ -73,34 +74,31 @@ class KVPParser {
      * Once parser conversions are configured, run the 'process()' method on specified file location.
      * @param split: This is the substring that marks the separation of keys and values.
      * @return The processed key-value pairs in form Hashtable<String, Object>
+     * @throws KVPLineParsingException
      * */
-    public Hashtable<String, Object> process(String split) {
-        for (String line: lines) { // process every line in file
-            try {
-                Integer keyIndex = line.indexOf(split);
-                String key = line.substring(0, keyIndex);
-                String value = line.substring(line.length() - keyIndex);
+
+    public KVP process(String split, String line) throws KVPLineParsingException {
+        KVP processedKVP = new KVP(null, null);
+        try {
+                int keyIndex = line.indexOf(split);
+
+                if (keyIndex == -1) {
+                    throw new KVPLineParsingException(line + "\n split substring: " + split + "not found");
+                }
+
+                String key = line.substring(0, keyIndex).trim();
+                String value = line.substring(keyIndex + 1, line.length()).trim();
                 ConversionOperation conversionOperation = keyValueConversionOperationMap.get(key); // get appropriate ConversionOperation for key's corresponding values
                 if (conversionOperation != null) {
                     Object returnedValue = conversionOperation.apply(value);
-                    processedKVPs.put(key, returnedValue); // add key and processed values to processedKVPs Hashtable
+                    processedKVP.setKey(key);
+                    processedKVP.setValue(returnedValue);
                 }
             } catch (Exception e) {
-                Integer keyIndex = line.indexOf(split);
-                String key = line.substring(0, keyIndex);
-                String value = line.substring(line.length() - keyIndex);
-                ConversionOperation conversionOperation = keyValueConversionOperationMap.get(key); // get appropriate ConversionOperation for key's corresponding values
-                throw new KVPParsingException(key, value, conversionOperation);
+                throw new KVPLineParsingException(line);
             }
-        }
-        return processedKVPs;
+        return processedKVP;
     }
-
-    @FunctionalInterface
-    public interface ConversionOperation {
-        Object apply(String unprocessedVal);
-    }
-
 
     public enum premadeConversionOperation implements ConversionOperation {
         /**
@@ -185,17 +183,21 @@ class KVPParser {
         }
     }
 
-    class KVPParsingException extends RuntimeException {
-        public KVPParsingException(String key, String value, ConversionOperation operation) {
-            super("KVPParsingException: Unable to perform operation: " + operation + " on key: " + key + " for value " + value);
+    class KVPLineParsingException extends RuntimeException {
+        public KVPLineParsingException(String line) {
+            super("KVPParsingException: Unable to parse line: " + line + ". " );
         }
     }
 }
 
+@FunctionalInterface
+interface ConversionOperation {
+    Object apply(String unprocessedVal);
+}
 
-abstract class VirtualFile<T, K> {
+
+abstract class VirtualFile {
     private ArrayList<String> lines;
-    private K data;
 
     public VirtualFile(String fileLocation) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(fileLocation));
@@ -210,14 +212,4 @@ abstract class VirtualFile<T, K> {
     protected List<String> getLines() {
         return this.lines;
     }
-
-    // Returns the data of the file in generic type K
-    protected K getData() {
-        return this.data;
-    }
-
-    public abstract void printToStdout();
-
-    public abstract void sendToMaster(); // can remove this after, here as an idea, doesn't need to be implemented
-
 }
