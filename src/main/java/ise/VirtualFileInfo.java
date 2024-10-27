@@ -180,6 +180,16 @@ class KVPParser {
                     throw new NumberFormatException("The inputted value " + unprocessedVal + " can not be parsed to int");
                 }
             }
+        },
+        PARSE_INT_ARRAY_SPLIT_ON_SPACE {
+            public Integer[] apply(String unprocessedVal) {
+                String[] unprocessedValSplit = unprocessedVal.split(" ");
+                List<Integer> processedVal = new ArrayList<Integer>();
+                for (int i = 0; i < unprocessedValSplit.length; i++) {
+                    processedVal.add(Integer.parseInt(unprocessedValSplit[i]));
+                }
+                return processedVal.toArray(new Integer[processedVal.size()]);
+            }
         }
     }
 
