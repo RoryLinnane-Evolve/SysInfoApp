@@ -19,10 +19,10 @@ enum ProcState {
  * Provides information about processes similar to that of running the 'top'/'htop' command
  * in bash
  * */
-public class Process {
-    private final List<String> trimOnlyItemsList = Arrays.asList("Name", "Speculation_Store_Bypass", "SpeculationIndirectBranch", "Cpus_allowed", "untag_mask", "SigQ");
-    private final List<String> popThreeCharsReturnIntList = Arrays.asList("VmPeak", "VmSize", "VmLck", "VmPin", "VmHWM", "VmRSS", "RssAnon", "RssFile", "RssShmem", "VmData", "VmStk", "VmExe", "VmLib", "VmPTE", "VmSwap", "HugetlbPages", "untag_mask", "SigPnd", "ShdPnd", "SigBlk", "SigIgn", "SigCgt", "CapInh", "CapPrm", "CapEff", "CapBnd", "CapAmb");
-    private final List<String> parseLongList = Arrays.asList("Tgid", "Ngid", "Pid", "PPid", "TracerPid", "FDSize", "NStgid", "NSpid", "NSpgid", "NSsid", "Kthread", "CoreDumping", "THP_enabled", "Threads", "voluntary_ctxt_switches", "nonvoluntary_ctxt_switches");
+public class ProcStat {
+    private final List<String> trimOnlyItemsList = Arrays.asList("Umask", "Name", "Speculation_Store_Bypass", "SpeculationIndirectBranch", "Cpus_allowed", "untag_mask", "SigQ", "CapBnd");
+    private final List<String> popThreeCharsReturnIntList = Arrays.asList("VmPeak", "VmSize", "VmLck", "VmPin", "VmHWM", "VmRSS", "RssAnon", "RssFile", "RssShmem", "VmData", "VmStk", "VmExe", "VmLib", "VmPTE", "VmSwap", "HugetlbPages", "SigPnd", "ShdPnd", "SigBlk", "SigIgn", "SigCgt", "CapInh", "CapPrm", "CapEff", "CapAmb");
+    private final List<String> parseLongList = Arrays.asList("Seccomp","NoNewPrivs", "Tgid", "Ngid", "Pid", "PPid", "TracerPid", "FDSize", "NStgid", "NSpid", "NSpgid", "NSsid", "Kthread", "CoreDumping", "THP_enabled", "Threads", "voluntary_ctxt_switches", "nonvoluntary_ctxt_switches", "Seccomp_filters", "Mems_allowed_list");
     private final List<String> processMemsAllowedList = Arrays.asList("Mems_allowed");
     private final List<String> processCpusAllowedListList = Arrays.asList("Cpus_allowed_list");
     private final List<String> processProcStateList = Arrays.asList("State");
@@ -61,7 +61,7 @@ public class Process {
         return stateToReturn;
     });
 
-    private Map<String, Object> getProcessInfo(int pid) throws IOException {
+    public Map<String, Object> getProcessInfo(int pid) throws IOException {
         List<Map<String, Object>> procCPUInfoTables = new ArrayList<Map<String, Object>>();
 
         KVPParser parser = new KVPParser();
@@ -82,7 +82,11 @@ public class Process {
             }
 
             KVP kvp = parser.process(":", line);
-            thisProcess.put(kvp.getKey(), kvp.getValue());
+            if (kvp.getValue()==null || kvp.getKey()==null) {
+                System.out.println("unable to parse line: " + line);
+            } else {
+                thisProcess.put(kvp.getKey(), kvp.getValue());
+            }
         }
 
         return thisProcess;
