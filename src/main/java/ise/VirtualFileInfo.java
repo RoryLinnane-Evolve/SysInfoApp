@@ -76,13 +76,21 @@ class KVPParser {
      * */
     public Hashtable<String, Object> process(String split) {
         for (String line: lines) { // process every line in file
-            Integer keyIndex = line.indexOf(split);
-            String key = line.substring(0, keyIndex);
-            String value = line.substring(line.length() - keyIndex);
-            ConversionOperation conversionOperation = keyValueConversionOperationMap.get(key); // get appropriate ConversionOperation for key's corresponding values
-            if (conversionOperation != null) {
-                Object returnedValue = conversionOperation.apply(value);
-                processedKVPs.put(key, returnedValue); // add key and processed values to processedKVPs Hashtable
+            try {
+                Integer keyIndex = line.indexOf(split);
+                String key = line.substring(0, keyIndex);
+                String value = line.substring(line.length() - keyIndex);
+                ConversionOperation conversionOperation = keyValueConversionOperationMap.get(key); // get appropriate ConversionOperation for key's corresponding values
+                if (conversionOperation != null) {
+                    Object returnedValue = conversionOperation.apply(value);
+                    processedKVPs.put(key, returnedValue); // add key and processed values to processedKVPs Hashtable
+                }
+            } catch (Exception e) {
+                Integer keyIndex = line.indexOf(split);
+                String key = line.substring(0, keyIndex);
+                String value = line.substring(line.length() - keyIndex);
+                ConversionOperation conversionOperation = keyValueConversionOperationMap.get(key); // get appropriate ConversionOperation for key's corresponding values
+                throw new KVPParsingException(key, value, conversionOperation);
             }
         }
         return processedKVPs;
@@ -174,6 +182,12 @@ class KVPParser {
                     throw new NumberFormatException("The inputted value " + unprocessedVal + " can not be parsed to int");
                 }
             }
+        }
+    }
+
+    class KVPParsingException extends RuntimeException {
+        public KVPParsingException(String key, String value, ConversionOperation operation) {
+            super("KVPParsingException: Unable to perform operation: " + operation + " on key: " + key + " for value " + value);
         }
     }
 }
