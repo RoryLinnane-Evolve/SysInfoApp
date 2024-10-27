@@ -100,6 +100,15 @@ class KVPParser {
         return processedKVP;
     }
 
+    public String[] getLines(String filePath) throws IOException {
+        try (Reader file = new FileReader(filePath);
+            BufferedReader reader = new BufferedReader(file)) {
+            Stream<String> linesStream = reader.lines();
+            return reader.lines().toArray(String[]::new);
+        }
+    }
+
+
     public enum premadeConversionOperation implements ConversionOperation {
         /**
          * Given a String 'unprocessedVal', will parse the unprocessedVal to integer.
