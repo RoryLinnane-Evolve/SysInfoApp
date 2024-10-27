@@ -13,13 +13,13 @@ import java.util.stream.Stream;
  * @version 2.0
  */
 public class ProcCPUInfo  {
-    private static final List<String> parseIntItemsList = Arrays.asList("clflush size", "cache alignment", "processor", "cpu family", "model", "stepping", "physical id", "siblings", "core id", "cpu cores", "apicid", "initial apicid", "cpuid level","cflush size", "cache_alignment");
-    private static final List<String> parseBooleanFromYesNoItemsList = Arrays.asList("fpu", "fpu_exception", "wp");
-    private static final List<String> splitOnSpaceItemsList = Arrays.asList("flags", "vmx flags", "bugs");
-    private static final List<String> parseDoubleItemsList = Arrays.asList("cpu MHz", "bogomips");
-    private static final List<String> trimOnlyItemsList = Arrays.asList("vendor_id", "model name", "microcode");
+    private final List<String> parseIntItemsList = Arrays.asList("clflush size", "cache alignment", "processor", "cpu family", "model", "stepping", "physical id", "siblings", "core id", "cpu cores", "apicid", "initial apicid", "cpuid level","cflush size", "cache_alignment");
+    private final List<String> parseBooleanFromYesNoItemsList = Arrays.asList("fpu", "fpu_exception", "wp");
+    private final List<String> splitOnSpaceItemsList = Arrays.asList("flags", "vmx flags", "bugs");
+    private final List<String> parseDoubleItemsList = Arrays.asList("cpu MHz", "bogomips");
+    private final List<String> trimOnlyItemsList = Arrays.asList("vendor_id", "model name", "microcode");
 
-    private static ConversionOperation processAddressSizes = (unprocessedVal -> {
+    private ConversionOperation processAddressSizes = (unprocessedVal -> {
         String[] splitUnprocessedVal = unprocessedVal.split(", ");
         String unprocessedBitsPhysical = splitUnprocessedVal[0].replace("bits physical", "").trim();
         String unprocessedBitsVirtual = splitUnprocessedVal[1].replace("bits virtual", "").trim();
