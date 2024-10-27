@@ -192,6 +192,7 @@ class KVPParser {
         },
         PARSE_INT_ARRAY_SPLIT_ON_SPACE {
             public Integer[] apply(String unprocessedVal) {
+                unprocessedVal = unprocessedVal.trim().replace("\t", " ");
                 String[] unprocessedValSplit = unprocessedVal.split(" ");
                 List<Integer> processedVal = new ArrayList<Integer>();
                 for (int i = 0; i < unprocessedValSplit.length; i++) {
