@@ -26,7 +26,20 @@ public class ProcStat {
     private final List<String> processMemsAllowedList = Arrays.asList("Mems_allowed");
     private final List<String> processCpusAllowedListList = Arrays.asList("Cpus_allowed_list");
     private final List<String> processProcStateList = Arrays.asList("State");
-    private final List<String> parseIntArraySplitOnSpaceList = Arrays.asList("Groups", "Uid", "Gid");
+    private final List<String> parseIntArraySplitOnSpaceList = Arrays.asList("Groups");
+    private final List<String> parseIDsList = Arrays.asList("Uid", "Gid");
+
+    private ConversionOperation processIDs = (idString -> {
+        Integer[] idsIntArray = (Integer[]) KVPParser.premadeConversionOperation.PARSE_INT_ARRAY_SPLIT_ON_SPACE.apply(idString);
+        List<String> idKeys = Arrays.asList("real", "effective", "saved_set", "filesystem");
+        Map<String, Integer> idTable = new HashMap<String, Integer>();
+
+        for (int i = 0; i < idsIntArray.length; i++) {
+            idTable.put(idKeys.get(i), idsIntArray[i]);
+        }
+
+        return idTable;
+    });
 
     private ConversionOperation processMemsAllowed = (memsAllowedString -> {
         String[] memsAllowed = memsAllowedString.trim().split(",");
@@ -72,6 +85,7 @@ public class ProcStat {
         parser.addConversion(processCpusAllowedListList, processCpusAllowedList);
         parser.addConversion(processProcStateList, processProcState);
         parser.addConversion(parseIntArraySplitOnSpaceList, KVPParser.premadeConversionOperation.PARSE_INT_ARRAY_SPLIT_ON_SPACE);
+        parser.addConversion(parseIDsList, processIDs);
 
         String[] lines = parser.getLines("/proc/" + pid + "/status");
 
