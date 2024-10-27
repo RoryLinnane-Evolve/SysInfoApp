@@ -11,11 +11,16 @@ package ise;
 
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
+import io.prometheus.client.GaugeMetricFamily;
 import io.prometheus.client.exporter.HTTPServer;
 import ise.SystemMemoryInfo;
 import java.lang.Math;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 public class MetricServer {
 
@@ -35,21 +40,51 @@ public class MetricServer {
             .help("System memory usage percentage.")
             .register();
 
-    static final Gauge systemCPUUsage = Gauge.build()
-            .name("system_CPU_usage")
-            .help("CPU usage percentage.")
+    static final Gauge systemCPUMHz = Gauge.build()
+            .name("system_CPU_MHz")
+            .help("CPU clock speed in megahertz.")
             .register();
+
+    static final Gauge processInfo = Gauge.build()
+            .name("system_process_info")
+            .help("Information about system processes")
+            .labelNames("pid", "name", "state")
+            .register();
+
 
     public static void main(String[] args) throws IOException {
         // Starts a http server
         HTTPServer server = new HTTPServer(8080);
 
-        while (true) {
+
+        Thread memAndCPU = new Thread(() -> {
             try {
+                systemMemmoryAndCPUUpdater();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Thread procs = new Thread(() -> {
+            try {
+                processesUpdater();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        memAndCPU.start();
+    }
+
+    public static void systemMemmoryAndCPUUpdater() throws Exception{
+        VirtualFileInfo cpuinfo = new VirtualFileInfo("/proc/cpuinfo");
+        ProcStatVF coresinfo = new ProcStatVF("/proc/stat");
+        while(true){
+            try{
                 // Get system memory information
                 SystemMemoryInfo mem = new SystemMemoryInfo();
 
-                // Update the Gauges with the current memory info
+                // Update the memory Gauges with the current memory info
                 totalMemory.set(mem.total);
                 freeMemory.set(mem.free);
 
@@ -57,15 +92,38 @@ public class MetricServer {
                 double memusage = (double)(mem.total-mem.available)/mem.total * 100;
                 systemMemoryUsage.set(Math.round(memusage));
 
-                //TODO: find cpu usage
-                double cpuUsage = 25;
-                systemCPUUsage.set(cpuUsage);
+                //Update cpu mhz
+                cpuinfo.setHashtable();
+                //retrieve it from Hashtable and update gauge
+                double cpuMHz = Double.parseDouble(cpuinfo.fileInfo.get("cpu MHz"));
+                systemCPUMHz.set(cpuMHz);
 
-                // delay 1 second
-                Thread.sleep(4);
+                //Get core info
+                //Hashtable<String, Hashtable<String, Long>> cores = coresinfo.getCPUOccupationTablesJiffies();
 
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.sleep(4000);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static void processesUpdater() throws Exception{
+        while (true){
+            try{
+                //Get process
+                ArrayList<Integer> pids = SystemProcessInfo.getAllRunningPIDs();
+                for (int id : pids) {
+                    Process process = new Process(id);
+                    Thread.sleep(1000);
+                    processInfo.labels(
+                            String.valueOf(process.getPID()),
+                            process.getName(),
+                            String.valueOf(process.getState())
+                    ).set(process.getCpuPercent());
+                }
+            } catch (Exception e){
+                throw new RuntimeException(e);
             }
         }
     }
