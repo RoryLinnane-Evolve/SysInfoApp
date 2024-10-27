@@ -1,9 +1,6 @@
 package ise;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -31,7 +28,7 @@ public class ProcCPUInfo  {
         return addressSizes;
     });
 
-    public List<Map<String, Object>> getProcCPUInfoTables () throws FileNotFoundException {
+    public List<Map<String, Object>> getProcCPUInfoTables () throws IOException {
         List<Map<String, Object>> procCPUInfoTables = new ArrayList<Map<String, Object>>();
 
         KVPParser parser = new KVPParser();
@@ -44,10 +41,7 @@ public class ProcCPUInfo  {
         parser.addConversion(Arrays.asList("address sizes"), processAddressSizes);
 
         // read file into a String[], each item representing a line
-        Reader file = new FileReader("/proc/cpuinfo");
-        BufferedReader reader = new BufferedReader(file);
-        Stream<String> linesStream = reader.lines();
-        String[] lines = linesStream.toArray(String[]::new);
+        String[] lines = parser.getLines("/proc/cpuinfo");
 
         // iterate through each line, and parse each line
         Map<String, Object> thisCPU = new Hashtable<String, Object>();
