@@ -7,10 +7,8 @@
 
 package ise;
 
-import jdk.incubator.vector.VectorOperators;
-
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.IntStream;
 
 enum ProcState {
@@ -25,6 +23,10 @@ public class Process {
     private final List<String> trimOnlyItemsList = Arrays.asList("Name", "Speculation_Store_Bypass", "SpeculationIndirectBranch", "Cpus_allowed", "untag_mask", "SigQ");
     private final List<String> popThreeCharsReturnIntList = Arrays.asList("VmPeak", "VmSize", "VmLck", "VmPin", "VmHWM", "VmRSS", "RssAnon", "RssFile", "RssShmem", "VmData", "VmStk", "VmExe", "VmLib", "VmPTE", "VmSwap", "HugetlbPages", "untag_mask", "SigPnd", "ShdPnd", "SigBlk", "SigIgn", "SigCgt", "CapInh", "CapPrm", "CapEff", "CapBnd", "CapAmb");
     private final List<String> parseLongList = Arrays.asList("Tgid", "Ngid", "Pid", "PPid", "TracerPid", "FDSize", "NStgid", "NSpid", "NSpgid", "NSsid", "Kthread", "CoreDumping", "THP_enabled", "Threads", "voluntary_ctxt_switches", "nonvoluntary_ctxt_switches");
+    private final List<String> processMemsAllowedList = Arrays.asList("Mems_allowed");
+    private final List<String> processCpusAllowedListList = Arrays.asList("Cpus_allowed_list");
+    private final List<String> processProcStateList = Arrays.asList("State");
+    private final List<String> parseIntArraySplitOnSpaceList = Arrays.asList("Groups", "Uid", "Gid");
 
     private ConversionOperation processMemsAllowed = (memsAllowedString -> {
         String[] memsAllowed = memsAllowedString.trim().split(",");
@@ -59,5 +61,30 @@ public class Process {
         return stateToReturn;
     });
 
+    private Map<String, Object> getProcessInfo(int pid) throws IOException {
+        List<Map<String, Object>> procCPUInfoTables = new ArrayList<Map<String, Object>>();
 
+        KVPParser parser = new KVPParser();
+        parser.addConversion(trimOnlyItemsList, KVPParser.premadeConversionOperation.TRIM_STRING);
+        parser.addConversion(popThreeCharsReturnIntList, KVPParser.premadeConversionOperation.POP_3_CHARS_RETURN_INT);
+        parser.addConversion(parseLongList, KVPParser.premadeConversionOperation.PARSE_LONG);
+        parser.addConversion(processMemsAllowedList, processMemsAllowed);
+        parser.addConversion(processCpusAllowedListList, processCpusAllowedList);
+        parser.addConversion(processProcStateList, processProcState);
+        parser.addConversion(parseIntArraySplitOnSpaceList, KVPParser.premadeConversionOperation.PARSE_INT_ARRAY_SPLIT_ON_SPACE);
+
+        String[] lines = parser.getLines("/proc/" + pid + "/status");
+
+        Map<String, Object> thisProcess = new Hashtable<String, Object>();
+        for (String line : lines) {
+            if (line.contains("x86_Thread_features")) {
+                continue;
+            }
+
+            KVP kvp = parser.process(":", line);
+            thisProcess.put(kvp.getKey(), kvp.getValue());
+        }
+
+        return thisProcess;
+    }
 }
