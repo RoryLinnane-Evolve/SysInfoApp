@@ -12,12 +12,10 @@ package ise;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.sql.Array;
 import java.util.*;
 import java.util.stream.Stream;
 
-class VirtualFileInfo {
+public class VirtualFileInfo {
     public String fileLocation;
     public VirtualFileInfo(String fileLocation) {
         this.fileLocation = fileLocation;
@@ -49,67 +47,131 @@ class VirtualFileInfo {
         this.fileInfo = table;
     }
 
-    class KVPParser {
-        private HashMap<String, VFStringValueOperation> conversionMap = new HashMap<String, VFStringValueOperation>();
+    /**
+     * Creates a resulting information object of shape T.
+     * Add reusable KVPParser.conversionOperations or create your own with ConversionOperation interface.
+     * */
+    class KVPParser<T> {
+        private HashMap<String, ConversionOperation> conversionMap = new HashMap<String, ConversionOperation>();
         private ArrayList<String> lines = new ArrayList<String>();
+        private Hashtable<String, Object> processedKVPs = new Hashtable<String, Object>();
 
-        public void addConversion(List<String> keys, VFStringValueOperation conversionOperation) {
+        /**
+         * Method is used to configure KVPParser based on the behaviour of a virtual file.
+         * @param conversionOperation - the operation that is to be applied to all corresponding values of the keys.
+         * @param keys - list of keys whose values require a conversionOperation.
+         * @return void
+         * */
+        public void addConversion(List<String> keys, ConversionOperation conversionOperation) {
             for (String key : keys) {
                 conversionMap.put(key, conversionOperation);
             }
         }
 
-        public void run(String delimiter) {
+        /**
+         * Once parser conversions are configured, run the 'process()' method on specified file location.
+         * @param split: This is the substring that marks the separation of keys and values.
+         * @return The processed key-value pairs in form Hashtable<String, Object>
+         * */
+        public Hashtable<String, Object> process(String split) {
             for (String line: lines) {
-                Integer keyIndex = line.indexOf(delimiter);
+                Integer keyIndex = line.indexOf(split);
                 String key = line.substring(0, keyIndex);
-                String value = line.substring(delimiter.length() - keyIndex);
-                VFStringValueOperation conversionOperation = conversionMap.get(key);
+                String value = line.substring(line.length() - keyIndex);
+                ConversionOperation conversionOperation = conversionMap.get(key);
                 if (conversionOperation != null) {
-                    conversionOperation.apply(value);
+                    Object returnedValue = conversionOperation.apply(value);
+                    processedKVPs.put(key, returnedValue);
                 }
             }
+            return processedKVPs;
         }
 
         @FunctionalInterface
-        public interface VFStringValueOperationsInterface {
-            Object apply(String stringToConvert);
+        public interface ConversionOperation {
+            Object apply(String unprocessedVal);
         }
 
-        public enum VFStringValueOperation implements VFStringValueOperationsInterface  {
+
+        public enum premadeConversionOperation implements ConversionOperation {
+            /**
+             * Given a String 'unprocessedVal', will parse the unprocessedVal to integer.
+             * @implements ConversionOperation
+             * @throws NumberFormatException
+             * @returns parsedInt
+             * */
             PARSE_INT {
-                public Integer apply(String stringToConvert) {
-                    return Integer.parseInt(stringToConvert);
+                public Integer apply(String unprocessedVal) throws NumberFormatException {
+                    return Integer.parseInt(unprocessedVal);
                 }
             },
-            PARSE_BOOLEAN_FROM_YES_NO {
-                public Boolean apply(String stringToConvert) {
-                    if (stringToConvert.equalsIgnoreCase("yes")) {
+            /**
+             * Given String 'unprocessedVal' will return boolean value 'true' if unprocessedVal="yes" and boolean val 'false' otherwise.
+             * @param unprocessedVal
+             * @returns Boolean
+             * @throws InputMismatchException - if unprocessedVal is neither yes nor no.
+             * */
+            BOOLEAN_FROM_YES_NO {
+                public Boolean apply(String unprocessedVal) throws InputMismatchException {
+                    if (unprocessedVal.equalsIgnoreCase("yes")) {
                         return true;
-                    } else {
+                    } else if (unprocessedVal.equalsIgnoreCase("no")) {
                         return false;
+                    } else {
+                        throw new InputMismatchException("The inputted value " + unprocessedVal + " is neither 'yes' nor 'no'");
                     }
                 }
             },
+            /**
+             * Takes in string unprocessedVal and returns a String[] of the words in the String unprocessedVal.
+             * Splits unprocessedVal based on spaces.
+             * @param unprocessedVal
+             * @returns String[]
+             * */
             SPLIT_ON_SPACE {
-                public String[] apply(String stringToConvert) {
-                    return stringToConvert.split(" ");
+                public String[] apply(String unprocessedVal) {
+                    return unprocessedVal.split(" ");
                 }
             },
+            /**
+             * Parses unprocessedVal to Double and returns processed value.
+             * @param unprocessedVal
+             * @returns Double
+             * @throws NumberFormatException
+             * */
             PARSE_DOUBLE {
-                public Double apply(String stringToConvert) {
-                    return Double.parseDouble(stringToConvert);
+                public Double apply(String unprocessedVal) throws NumberFormatException {
+                    try {
+                        return Double.parseDouble(unprocessedVal);
+                    } catch (NumberFormatException e) {
+                        throw new NumberFormatException("The inputted value " + unprocessedVal + " can not be parsed to double");
+                    }
                 }
             },
+            /**
+             * Accepts param unprocessedVal of type String, applies String.trim() method and returns
+             * @param unprocessedVal
+             * @returns String
+             * */
             TRIM_STRING {
-                public String apply(String stringToConvert) {
-                    return stringToConvert.trim();
+                public String apply(String unprocessedVal) {
+                    return unprocessedVal.trim();
                 }
             },
+            /**
+             * Pops last 3 chars from String unprocessedVal, then casts to Integer and returns processed value.
+             * @param unprocessedVal
+             * @return Integer
+             * @throws NumberFormatException
+             * */
             POP_3_CHARS_RETURN_INT {
-                public Integer apply(String stringToConvert) {
-                    String stringInt = stringToConvert.substring(0, stringToConvert.length() -3);
-                    return Integer.parseInt(stringInt);
+                public Integer apply(String unprocessedVal) throws NumberFormatException {
+                    String stringInt = unprocessedVal.substring(0, unprocessedVal.length() -3);
+                    try {
+                        return Integer.parseInt(stringInt);
+                    } catch (NumberFormatException e) {
+                        throw new NumberFormatException("The inputted value " + unprocessedVal + " can not be parsed to int");
+                    }
                 }
             }
         }
