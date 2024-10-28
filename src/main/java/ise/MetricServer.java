@@ -72,7 +72,7 @@ public class MetricServer {
                 throw new RuntimeException(e);
             }
         });
-
+        procs.start();
         memAndCPU.start();
     }
 
@@ -115,13 +115,14 @@ public class MetricServer {
                 ArrayList<Integer> pids = SystemProcessInfo.getAllRunningPIDs();
                 for (int id : pids) {
                     Process process = new Process(id);
-                    Thread.sleep(1000);
+
                     processInfo.labels(
                             String.valueOf(process.getPID()),
                             process.getName(),
                             String.valueOf(process.getState())
                     ).set(process.getCpuPercent());
                 }
+                Thread.sleep(4000);
             } catch (Exception e){
                 throw new RuntimeException(e);
             }
