@@ -1,50 +1,33 @@
 package ise;
 import org.apache.commons.cli.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+/**
+ * implements the CLI functionality of the application
+ * @author Mikey Fennelly
+ * @version 1.0
+ */
 public class CLI {
-    public static void main(String[] args) {
-        Options options = new Options();
+    private static Map<Option, ArrayList<String>> optionsAndValidValues = new HashMap<Option, ArrayList<String>>();
 
-        Option markMode = Option.builder("m")
-                .longOpt("markMode")
-                .desc("Submodule used to specify system information and attached devices")
-                .hasArgs()
-                .valueSeparator(' ')
-                .build();
+    static Option markMode = Option.builder("m")
+            .longOpt("markMode")
+            .desc("Submodule used to specify system information and attached devices")
+            .hasArgs()
+            .valueSeparator(' ')
+            .hasArg(true)
+            .build();
 
-        options.addOption(markMode);
-
-        CommandLineParser parser = new DefaultParser();
+    public static void main(String[] programArgs) {
+        Options validOptions = new Options();
         HelpFormatter helpFormatter = new HelpFormatter();
+        CommandLineParser parser = new DefaultParser();
+
+        validOptions.addOption(markMode);
         try {
-            CommandLine cmd = parser.parse(options, args);
-
-            Printer printer = new Printer();
-            if (cmd.hasOption("m")) {
-                String[] markModeVals = cmd.getOptionValues("m");
-                for (String markModeVal : markModeVals) {
-                    switch (markModeVal) {
-                        case "-pci":
-                            printer.addPrintItem("PCIItems");
-                            break;
-                        case "-disk":
-                            printer.addPrintItem("DiskItems");
-                            break;
-                        case "-usb":
-                            printer.addPrintItem("USBItems");
-                            break;
-                        default:
-                            System.out.println("Unknown argument value for option: " + markModeVal);
-                            helpFormatter.printHelp("cli", options);
-                            break;
-                    }
-                }
-            }
-
-            printer.print();
+            CommandLine cmd = parser.parse(validOptions, programArgs);
+            processOptions(cmd);
         } catch (ParseException e) {
             System.err.println("Parsing failed. Reason: " + e.getMessage());
         }
@@ -53,18 +36,15 @@ public class CLI {
     private static void listPCIDevices() {
         System.out.println("PCI Devices");
     }
-}
 
-class Printer {
-    private List<String> thingsToPrint = new ArrayList<String>();
-
-    public void addPrintItem(String thingToPrint) {
-        thingsToPrint.add(thingToPrint);
-    }
-
-    public void print() {
-        for (String thingToPrint : thingsToPrint) {
-            System.out.println(thingToPrint);
+    private static void processOptions(CommandLine cmd) throws ParseException {
+        // iterate through all options parser parsed
+        for (Option option : cmd.getOptions()) {
+            String[] optionVals = option.getValues();
         }
+        // iterate through options
+        // check if the option values are valid
+        // check validity of optionValues for the arg
+
     }
 }
