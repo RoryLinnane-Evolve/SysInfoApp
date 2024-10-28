@@ -1,7 +1,9 @@
 package ise;
 import org.apache.commons.cli.*;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * implements the CLI functionality of the application
@@ -45,6 +47,23 @@ public class CLI {
         // iterate through options
         // check if the option values are valid
         // check validity of optionValues for the arg
+    }
+}
 
+class BasicCLI {
+    public static void main(String[] args) throws IOException {
+        ProcCPUInfo procCpuInfo = new ProcCPUInfo();
+        List<Map<String, Object>> procCPUInfoTables = procCpuInfo.getProcCPUInfoTables();
+        for (Map<String, Object> procCPUInfoTable : procCPUInfoTables) {
+            KVPPrinter(procCPUInfoTable);
+        }
+    }
+
+    private static void KVPPrinter(Map<String, Object> map) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue().toString();
+            System.out.println(key + ": " + value);
+        };
     }
 }
