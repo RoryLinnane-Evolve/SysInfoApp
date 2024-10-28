@@ -24,7 +24,7 @@ public class PCIInfo {
     //  Defines the command to be the Linux command lspci, to pull the information about the pci from the device.
     private static final String LSPCI_COMMAND = "lspci";
 
-    //  Start point for the program. Also declares that there might be and IOException.
+        //  Start point for the program. Also declares that there might be and IOException.
     public static void main(String[] args) throws IOException {
 
 //      Calls each method i.e. Bus Count and output prints a message.
