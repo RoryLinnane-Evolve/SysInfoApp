@@ -46,7 +46,7 @@ public class ProcCPUInfo  {
         // iterate through each line, and parse each line
         Map<String, Object> thisCPU = new Hashtable<String, Object>();
         for (String line : lines) {
-            if (line.trim().isEmpty()) {
+            if (line.trim().isEmpty() || line.substring(line.indexOf(":"), line.length() -1).trim().isEmpty()) {
                 continue;
             }
             if (line.contains("power management")) {
