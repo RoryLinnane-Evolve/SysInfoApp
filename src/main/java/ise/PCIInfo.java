@@ -104,7 +104,7 @@ public class PCIInfo {
             return -1;
         }
     }
-    //  This is the Method(s) execution.
+//  This is the Method(s) execution.
 //  Takes in two parameters, the command and the IDType/Keyword.
     private static String getIDFromCommand(String command, String idType) {
 //      Runs the command by using Java's Runtime class.
