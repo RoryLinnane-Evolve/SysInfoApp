@@ -1,7 +1,7 @@
 /*
 Package for the ISE Final Project of Block 1 of First Year.
  */
-package main.java.ise;
+package ise;
 
 
 
@@ -24,7 +24,7 @@ public class PCIInfo {
     //  Defines the command to be the Linux command lspci, to pull the information about the pci from the device.
     private static final String LSPCI_COMMAND = "lspci";
 
-        //  Start point for the program. Also declares that there might be and IOException.
+    //  Start point for the program. Also declares that there might be and IOException.
     public static void main(String[] args) throws IOException {
 
 //      Calls each method i.e. Bus Count and output prints a message.
@@ -49,13 +49,12 @@ public class PCIInfo {
     }
 
 
-
-
     // Each of these are the methods from the previous block of code.
     private static int getBusCount() {
         return getCountFromCommand(LSPCI_COMMAND, "Bus");
     }
-// Each method runes the command ``lspci`` and looks for a keyword that is associated with the correct response.
+
+    // Each method runes the command ``lspci`` and looks for a keyword that is associated with the correct response.
 // For ,devices it looks fof the line that starts with the keyword Device.
 // For ,functions it looks for the keyword ``:`` which denotes the function line from the pci info.
     private static int getDeviceCount() {
@@ -77,8 +76,6 @@ public class PCIInfo {
 //    private static String getProductID() {
 //        return getIDFromCommand(LSPCI_COMMAND, "ID");
 //    }
-
-
 
 
     //  This is the Method(s) execution.
@@ -104,7 +101,8 @@ public class PCIInfo {
             return -1;
         }
     }
-//  This is the Method(s) execution.
+
+    //  This is the Method(s) execution.
 //  Takes in two parameters, the command and the IDType/Keyword.
     private static String getIDFromCommand(String command, String idType) {
 //      Runs the command by using Java's Runtime class.
@@ -132,3 +130,4 @@ public class PCIInfo {
             return "Error";
         }
     }
+}
