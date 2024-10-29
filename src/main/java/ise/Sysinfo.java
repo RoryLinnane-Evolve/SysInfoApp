@@ -6,9 +6,21 @@
  */
 package ise;
 
-import java.io.IOException;
+public abstract class Sysinfo {
 
-public class Sysinfo {
-    public static void main(String[] args) throws IOException {
+    private final String name;
+
+    public Sysinfo(String name) {
+        this.name = name;
     }
+
+    public void printConsoleHeader() {
+        System.out.println("===================================================");
+        System.out.println(name);
+        System.out.println("===================================================");
+    }
+
+    public abstract void printToConsole();
+
+    public abstract void sendToOpenTelemetry();
 }
