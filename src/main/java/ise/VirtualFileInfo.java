@@ -59,7 +59,7 @@ class KVPParser {
     private ArrayList<String> lines = new ArrayList<String>();
 
     /**
-     * Method is used to configure KVPParser based on the behaviour of a virtual file.
+     * Used to configure KVPParser based on the behaviour of a virtual file.
      * @param conversionOperation - the operation that is to be applied to all corresponding values of the keys.
      * @param keys - list of keys whose values require a conversionOperation.
      * @return void
