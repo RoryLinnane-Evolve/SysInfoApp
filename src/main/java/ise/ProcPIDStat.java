@@ -14,7 +14,11 @@ import java.util.Map;
  * @author Mikey Fennelly
  * @version 1.0
  * */
-class ProcPIDStat {
+class ProcPIDStat extends Sysinfo {
+    ProcPIDStat() {
+        super("ProcPIDStat");
+    }
+
     public Map<String, Object> getProcPIDStatInfo(int pid) throws IOException {
         KVPParser parser = new KVPParser();
         String[] lines = parser.getLines("/proc/" + pid + "/stat" );
@@ -28,7 +32,6 @@ class ProcPIDStat {
         for (int i = 0; i < onlyLineInFileKeys.size(); i++) {
             String thisLineKey = onlyLineInFileKeys.get(i);
             String thisLineValueString = onlyLineInFileValsSplit[i];
-            System.out.println(thisLineKey + " : " + thisLineValueString);
 
             try {
                 if (thisLineKey == "comm" || thisLineKey == "state") {
@@ -44,5 +47,28 @@ class ProcPIDStat {
         }
 
         return returnMap;
+    }
+
+    @Override
+    public void printToConsole() {
+        this.printConsoleHeader();
+        SystemProcessInfo systemProcessInfo = new SystemProcessInfo();
+        List<Integer> allRunningPids = systemProcessInfo.getAllRunningPIDs();
+        allRunningPids.forEach(pid -> {
+            try {
+                Map<String, Object> processInfo = this.getProcPIDStatInfo(pid);
+                System.out.println("Process " + processInfo.get("pid") + ": ");
+                processInfo.entrySet().forEach(entry -> {
+                    System.out.println("    " + entry.getKey() + ": " + entry.getValue());
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    @Override
+    public void sendToOpenTelemetry() {
+
     }
 }

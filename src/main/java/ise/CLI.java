@@ -13,7 +13,8 @@ import java.util.stream.Stream;
  */
 public class CLI {
     private static List<Sysinfo> sysInfos = Arrays.asList(
-      new ProcCPUInfo()
+            new ProcCPUInfo(),
+            new ProcPIDStat()
     );
 
     public static void main(String[] programArgs) {
