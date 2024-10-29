@@ -1,9 +1,10 @@
 package ise;
 import org.apache.commons.cli.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * implements the CLI functionality of the application
@@ -65,5 +66,24 @@ class BasicCLI {
             String value = entry.getValue().toString();
             System.out.println(key + ": " + value);
         };
+    }
+
+    private static void basicReadAndPrint(String filePath) throws FileNotFoundException {
+        try (Reader file = new FileReader(filePath);
+             BufferedReader reader = new BufferedReader(file)) {
+            Stream<String> linesStream = reader.lines();
+            String[] fileLines = reader.lines().toArray(String[]::new);
+            for (String line: fileLines) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void dumpAllVFs() throws FileNotFoundException {
+        basicReadAndPrint("/proc/cpuinfo");
+        basicReadAndPrint("/proc/stat");
+        basicReadAndPrint("/proc/meminfo");
     }
 }
