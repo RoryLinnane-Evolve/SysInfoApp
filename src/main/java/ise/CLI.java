@@ -19,6 +19,7 @@ public class CLI {
     private static final Option pci = new Option("p","pci",false,"display pci information");
     private static final Option memory = new Option("m","memory",false,"display  memory information");
     private static final Option process = new Option("P","Process",false, "display process information");
+    private static final Option server = new Option("s","server",false,"start server features");
 
     private static final Option help = new Option("h","help",false,"Show available commands");
 
@@ -192,6 +193,12 @@ public class CLI {
         return pidList;
     }
 
+    public static void serverRun(){
+        //MetricServer server = new MetricServer("172.27.254.4,8080");
+        //server.start();
+
+        //System.out.println("Server started at 172.27.254.4 : 8080");
+    }
     public static void main(String[] args){
         clp = new DefaultParser();
 
@@ -201,6 +208,7 @@ public class CLI {
         options.addOption(pci);
         options.addOption(memory);
         options.addOption(process);
+        options.addOption(server);
         options.addOption(help);
         try {
             CommandLine cl = clp.parse(options, args);
@@ -212,6 +220,7 @@ public class CLI {
             if (cl.hasOption(pci.getLongOpt())) {argCount++;}
             if (cl.hasOption(memory.getLongOpt())) {argCount++;}
             if (cl.hasOption(process.getLongOpt())) {argCount++;}
+            if (cl.hasOption(server.getLongOpt())) {argCount++;}
 
             if (argCount != 1) { // if there is anything other than 1 argument call help
                 printHelp(options);
@@ -240,7 +249,9 @@ public class CLI {
                 }
             } else if (cl.hasOption(process.getLongOpt())){
                 processInfo();
-            } else if (cl.hasOption(help.getLongOpt())) {
+            } else if (cl.hasOption(server.getLongOpt())){
+                serverRun();
+            }else if (cl.hasOption(help.getLongOpt())) {
                 printHelp(options);
             } else {
                 printHelp(options);
