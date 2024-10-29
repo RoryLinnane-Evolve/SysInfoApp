@@ -7,14 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Method 'getProcPIDStatInfo()' can be used to retrieve information in KVP format from /proc/<pid>/stat file - given PID for that process.
+ * Docs for /proc/<pid>/stat file on Linux can be found at url: https://manpages.ubuntu.com/manpages/noble/man5/proc_pid_stat.5.html#:~:text=DESCRIPTION,file%20fs%2Fproc%2Farray.
+ * see the following gist for example usage and docs: https://gist.github.com/mikeyfennelly1/0698dc6435a8547373270fca7971c65b
+ * @author Mikey Fennelly
+ * @version 1.0
+ * */
 class ProcPIDStat {
-    public static void main(String[] args) throws IOException {
-        Map<String, Object> procPidStat = parseProcPIDStat(3157);
-
-        int d = 2;
-    }
-
-    private static Map<String, Object> parseProcPIDStat(int pid) throws IOException {
+    public Map<String, Object> getProcPIDStatInfo(int pid) throws IOException {
         KVPParser parser = new KVPParser();
         String[] lines = parser.getLines("/proc/" + pid + "/stat" );
         String onlyLineInFile = lines[0];
