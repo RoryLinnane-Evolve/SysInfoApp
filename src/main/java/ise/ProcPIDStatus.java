@@ -19,7 +19,7 @@ enum ProcState {
  * Provides information about processes similar to that of running the 'top'/'htop' command
  * in bash
  * */
-public class ProcStat {
+public class ProcPIDStatus {
     private final List<String> trimOnlyItemsList = Arrays.asList("Umask", "Name", "Speculation_Store_Bypass", "SpeculationIndirectBranch", "Cpus_allowed", "untag_mask", "SigQ", "CapBnd");
     private final List<String> popThreeCharsReturnIntList = Arrays.asList("VmPeak", "VmSize", "VmLck", "VmPin", "VmHWM", "VmRSS", "RssAnon", "RssFile", "RssShmem", "VmData", "VmStk", "VmExe", "VmLib", "VmPTE", "VmSwap", "HugetlbPages", "SigPnd", "ShdPnd", "SigBlk", "SigIgn", "SigCgt", "CapInh", "CapPrm", "CapEff", "CapAmb");
     private final List<String> parseLongList = Arrays.asList("Seccomp","NoNewPrivs", "Tgid", "Ngid", "Pid", "PPid", "TracerPid", "FDSize", "NStgid", "NSpid", "NSpgid", "NSsid", "Kthread", "CoreDumping", "THP_enabled", "Threads", "voluntary_ctxt_switches", "nonvoluntary_ctxt_switches", "Seccomp_filters", "Mems_allowed_list");
