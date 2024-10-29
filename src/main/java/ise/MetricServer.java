@@ -53,6 +53,18 @@ public class MetricServer {
             .labelNames("pid", "name", "state")
             .register();
 
+    final Gauge pciInfo = Gauge.build()
+            .name("system_pci_info")
+            .help("contains all the information about the pci buses in the system.")
+            .labelNames("busCount", "deviceCount", "functionCount", "functionsPresent")
+            .register();
+
+    final Gauge usbInfo = Gauge.build()
+            .name("system_usb_info")
+            .help("all system usb information")
+            .labelNames("")
+            .register();
+
     private String IPAddress ;
     private int port;
 
@@ -67,6 +79,9 @@ public class MetricServer {
         // metrics are exposed at <localIp>:port/metrics
         InetSocketAddress address = new InetSocketAddress(IPAddress, port);
         HTTPServer server = new HTTPServer.Builder().withInetSocketAddress(address).build();
+
+        //TODO: Collect PCI, USB and disk information
+        pciInfo.labels(String.valueOf(PCIInfo.getBusCount()), String.valueOf(PCIInfo.getDeviceCount()), String.valueOf(PCIInfo.getFunctionCount()), String.valueOf(PCIInfo.getFunctionPresent()));
 
         //creating the thread for the memory and cpu metrics to be updated
         Thread memAndCPU = new Thread(() -> {
@@ -114,7 +129,6 @@ public class MetricServer {
 
                 //TODO: Calculate CPU Usage
 
-                //TODO: Collect PCI, USB and disk information
 
 
                 //retrieve it from Hashtable and update gauge
@@ -131,7 +145,8 @@ public class MetricServer {
 
     private void processesUpdater() throws Exception{
 
-        ProcPIDStat proc = new ProcPIDStat();
+        ProcPIDStat procStat = new ProcPIDStat();
+        ProcPIDStatus procStatus = new ProcPIDStatus();
         while (true){
             try{
                 //Get process
@@ -140,14 +155,16 @@ public class MetricServer {
                 //Loop through the process ids
                 for (int id : pids) {
                     //gets the process infromation for the current id
+                    Map<String, Object> procStatusInfo =  procStatus.getProcessInfo(id);
 
-                    Map<String, Object> procInfo = proc.getProcPIDStatInfo(id);
+                    Map<String, Object> procStatInfo = procStat.getProcPIDStatInfo(id);
+
 
                     //updates the gauge list for the current process
                     processInfo.labels(
-                            String.valueOf(procInfo.get("Pid")),
-                            String.valueOf(procInfo.get("Name")),
-                            String.valueOf(procInfo.get("State"))
+                            String.valueOf(procStatusInfo.get("Pid")),
+                            String.valueOf(procStatusInfo.get("Name")),
+                            String.valueOf(procStatusInfo.get("State"))
                     ).set(0);
                 }
 
