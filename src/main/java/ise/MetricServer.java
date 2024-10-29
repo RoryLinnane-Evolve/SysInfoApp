@@ -62,7 +62,7 @@ public class MetricServer {
     final Gauge usbInfo = Gauge.build()
             .name("system_usb_info")
             .help("all system usb information")
-            .labelNames("")
+            .labelNames("busCount", "deviceCount", "vendorID", "productID")
             .register();
 
     private String IPAddress ;
@@ -80,8 +80,19 @@ public class MetricServer {
         InetSocketAddress address = new InetSocketAddress(IPAddress, port);
         HTTPServer server = new HTTPServer.Builder().withInetSocketAddress(address).build();
 
-        //TODO: Collect PCI, USB and disk information
-        pciInfo.labels(String.valueOf(PCIInfo.getBusCount()), String.valueOf(PCIInfo.getDeviceCount()), String.valueOf(PCIInfo.getFunctionCount()), String.valueOf(PCIInfo.getFunctionPresent()));
+        //TODO: Collect USB and disk information
+
+        //gets the pci info and updates the gauge with the values
+        pciInfo.labels(String.valueOf(PCIInfo.getBusCount()),
+                String.valueOf(PCIInfo.getDeviceCount()),
+                String.valueOf(PCIInfo.getFunctionCount()),
+                String.valueOf(PCIInfo.getFunctionPresent()));
+
+        //gets the usb info and updates the gauge with the values
+        usbInfo.labels(String.valueOf(USBInfo.getBusCount()),
+                String.valueOf(USBInfo.getDeviceCount()),
+                String.valueOf(USBInfo.getVendorID()),
+                String.valueOf(USBInfo.getProductID()));
 
         //creating the thread for the memory and cpu metrics to be updated
         Thread memAndCPU = new Thread(() -> {
