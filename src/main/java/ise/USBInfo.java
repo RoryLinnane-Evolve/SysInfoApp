@@ -1,7 +1,7 @@
 /*
 Package for the ISE Final Project of Block 1 of First Year.
  */
-package ise;
+package main.java.ise;
 
 
 /*

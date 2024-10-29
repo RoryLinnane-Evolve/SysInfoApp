@@ -1,7 +1,7 @@
 /*
 Package for the ISE Final Project of Block 1 of First Year.
 */
-package ise;
+package main.java.ise;
 
 
 
@@ -41,7 +41,7 @@ public class DiskInfo {
         System.out.println("Available Disk(s): " + diskAvailable);
 
     }
-// The methods for the pervious code
+// The methods for the previous code
     private static int getDiskCount(List<String> dfOutput) {
         return dfOutput.size() - 1;
     }
@@ -49,13 +49,13 @@ public class DiskInfo {
     private static String getDeviceName(List<String> dfOutput) {
 //      Converts the list to a stream
         return dfOutput.stream()
-//               Skips the first line, due to it tipically being a header
+//               Skips the first line, due to it typically being a header
                 .skip(1)
 //               Finds the first lien after the header
                 .findFirst()
 //               Line Split
                 .map(line -> line.split("\\s+")[0])
-//               If result is not found it produces an error to notifiy the user
+//               If result is not found it produces an error to notify the user
                 .orElse("Not Found");
     }
 

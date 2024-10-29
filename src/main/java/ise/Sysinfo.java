@@ -4,7 +4,7 @@
  * @version 1.0
  * @author Mikey Fennelly
  */
-package ise;
+package main.java.ise;
 
 import java.io.IOException;
 

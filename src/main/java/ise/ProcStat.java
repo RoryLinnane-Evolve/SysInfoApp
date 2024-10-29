@@ -5,7 +5,7 @@
  * @version 1.0
  * */
 
-package ise;
+package main.java.ise;
 
 import java.io.IOException;
 import java.util.*;

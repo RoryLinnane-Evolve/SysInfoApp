@@ -1,4 +1,4 @@
-package ise;
+package main.java.ise;
 
 import java.io.IOException;
 import java.util.Set;

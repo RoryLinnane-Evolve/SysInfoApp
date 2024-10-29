@@ -1,4 +1,4 @@
-package ise;
+package main.java.ise;
 
 import java.io.*;
 import java.util.List;
