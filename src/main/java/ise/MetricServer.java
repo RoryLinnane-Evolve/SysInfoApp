@@ -109,21 +109,25 @@ public class MetricServer {
     }
 
     public static void processesUpdater() throws Exception{
+        ProcStat proc = new ProcStat();
+        int idss = 0;
         while (true){
             try{
                 //Get process
                 ArrayList<Integer> pids = SystemProcessInfo.getAllRunningPIDs();
                 for (int id : pids) {
-                    Process process = new Process(id);
+                    idss = id;
+                    Map<String, Object> procInfo = proc.getProcessInfo(id);
 
-                    processInfo.labels(
-                            String.valueOf(process.getPID()),
-                            process.getName(),
-                            String.valueOf(process.getState())
-                    ).set(process.getCpuPercent());
+//                    processInfo.labels(
+//                            String.valueOf(),
+//                            process.getName(),
+//                            String.valueOf(process.getState())
+//                    ).set(process.getCpuPercent());
                 }
                 Thread.sleep(4000);
             } catch (Exception e){
+                System.out.println(idss);
                 throw new RuntimeException(e);
             }
         }
