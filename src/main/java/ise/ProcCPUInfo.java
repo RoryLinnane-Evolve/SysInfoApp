@@ -32,7 +32,7 @@ public class ProcCPUInfo extends Sysinfo  {
     });
 
     public ProcCPUInfo() {
-        super("CPU Info");
+        super(ProcCPUInfo.class.getSimpleName());
     }
 
     public List<Map<String, Object>> getProcCPUInfoTables () throws IOException {
