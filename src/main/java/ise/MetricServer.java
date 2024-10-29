@@ -12,8 +12,11 @@ package ise;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.exporter.HTTPServer;
+import io.prometheus.client.Summary;
+import io.prometheus.client.exporter.*;
 import ise.SystemMemoryInfo;
+import main.java.ise.PCIInfo;
+
 import java.lang.Math;
 
 import java.io.IOException;
@@ -26,40 +29,48 @@ import java.util.Map;
 
 public class MetricServer {
 
+    // REPLACE THIS WITH YOUR MACHINES IP ADDRESS
+    private final String localIp = "172.27.254.4";
+    private final int port = 8080;
+
     // Create gauge metrics for system memory properties
-    static final Gauge totalMemory = Gauge.build()
+     final Gauge totalMemory = Gauge.build()
             .name("system_memory_total_kilobytes")
             .help("Total system memory in kilobytes.")
             .register();
 
-    static final Gauge freeMemory = Gauge.build()
+    final Gauge freeMemory = Gauge.build()
             .name("system_memory_free_kilobytes")
             .help("Free system memory in kilobytes.")
             .register();
 
-    static final Gauge systemMemoryUsage = Gauge.build()
+    final Gauge systemMemoryUsage = Gauge.build()
             .name("system_memory_usage")
             .help("System memory usage percentage.")
             .register();
 
-    static final Gauge systemCPUMHz = Gauge.build()
+    final Gauge systemCPUMHz = Gauge.build()
             .name("system_CPU_MHz")
             .help("CPU clock speed in megahertz.")
             .register();
 
-    static final Gauge processInfo = Gauge.build()
+    final Gauge processInfo = Gauge.build()
             .name("system_process_info")
             .help("Information about system processes")
             .labelNames("pid", "name", "state")
             .register();
 
-    // REPLACE THIS WITH YOUR MACHINES IP ADDRESS
-    private static final String localIp = "172.27.254.4";
-    private static final int port = 8080;
+    final io.prometheus.client.Summary pciInfo = Summary.build()
+            .name("system_pci_info")
+            .help("All the pci information of the machine.")
+            .labelNames("dta")
+            .register();
 
 
-    public static void main(String[] args) throws IOException {
 
+
+
+    public void start() throws IOException {
         // Starts a http server with the specified port and IP
         // metrics are exposed at <localIp>:port/metrics
         InetSocketAddress address = new InetSocketAddress(localIp, port);
@@ -88,10 +99,12 @@ public class MetricServer {
         memAndCPU.start();
     }
 
-    public static void systemMemmoryAndCPUUpdater() throws Exception{
+    private void systemMemmoryAndCPUUpdater() throws Exception{
 
         //creating the object for cpu information
         VirtualFileInfo cpuinfo = new VirtualFileInfo("/proc/cpuinfo");
+        pciInfo.labels(PCIInfo.getPciData());
+
 
         while(true){
             try{
@@ -121,7 +134,7 @@ public class MetricServer {
         }
     }
 
-    public static void processesUpdater() throws Exception{
+    private void processesUpdater() throws Exception{
         ProcStat proc = new ProcStat();
 
         while (true){
