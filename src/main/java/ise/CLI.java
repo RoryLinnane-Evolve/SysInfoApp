@@ -6,22 +6,19 @@ import org.apache.commons.lang3.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.rmi.MarshalException;
 import java.sql.SQLOutput;
 import java.util.*;
 
 public class CLI {
     // set up the options
-    private static final Option cpu = new Option("c","cpu",false,"display relevant cpu information");
-
-    private static final Option busses = new Option("b","busses",false,"display relevant bus information");
-
-    private static final Option memory = new Option("m","memory",false,"display relevant memory information");
-    private static final Option kb = new Option("kb",false,"convert unit to kb");
-    private static final Option mb = new Option("mb",false,"convert unit to mb");
-    private static final Option gb = new Option("gb",false,"convert unit to gb");
-
-    private static final Option process = new Option("p","process",false, "display process information");
+    private static final Option cpu = new Option("c","cpu",false,"display  cpu information");
+    private static final Option usb = new Option("u","usb",false,"display usb information");
+    private static final Option pci = new Option("p","pci",false,"display pci information");
+    private static final Option memory = new Option("m","memory",false,"display  memory information");
+    private static final Option process = new Option("P","Process",false, "display process information");
 
     private static final Option help = new Option("h","help",false,"Show available commands");
 
@@ -110,8 +107,89 @@ public class CLI {
       }
     }
 
-    public static void processInfo(){
+    public static void usbInfo(){
+        // Calls each method from USBInfo and prints the output
+        int busCount = USBInfo.getBusCount();
+        System.out.println("Bus Count: " + busCount);
 
+        int deviceCount = USBInfo.getDeviceCount();
+        System.out.println("Device Count: " + deviceCount);
+
+        String vendorID = USBInfo.getVendorID();
+        System.out.println("Vendor ID: " + vendorID);
+
+        String productID = USBInfo.getProductID();
+        System.out.println("Product ID: " + productID);
+    }
+
+    public static void pciInfo(){
+        // Calls each method from PCIInfo and prints the output
+        int busCount = PCIInfo.getBusCount();
+        System.out.println("Bus Count: " + busCount);
+
+        int deviceCount = PCIInfo.getDeviceCount();
+        System.out.println("Device Count: " + deviceCount);
+
+        int functionCount = PCIInfo.getFunctionCount();
+        System.out.println("Function Count: " + functionCount);
+
+        int functionPresent = PCIInfo.getFunctionPresent();
+        System.out.println("Function Present: " + functionPresent);
+    }
+
+    public static void processInfo(){
+        // Instantiate ProcPIDStatus and ProcPIDStat
+        ProcPIDStatus procPIDStatus = new ProcPIDStatus();
+        ProcPIDStat procPIDStat = new ProcPIDStat();
+
+        try {
+            // Retrieve a list of all active PIDs using the `ps` command
+            List<Integer> activePIDs = getActivePIDs();
+
+            // Loop through each PID to retrieve status and stat information
+            for (int pid : activePIDs) {
+                System.out.println("Process Information for PID: " + pid);
+
+                // Retrieve process status information for the current PID
+                Map<String, Object> statusInfo = procPIDStatus.getProcessInfo(pid);
+                System.out.println("Status Information:");
+                for (Map.Entry<String, Object> entry : statusInfo.entrySet()) {
+                    System.out.println(entry.getKey() + " : " + entry.getValue());
+                }
+
+                // Retrieve process stat information for the current PID
+                Map<String, Object> statInfo = procPIDStat.getProcPIDStatInfo(pid);
+                System.out.println("Stat Information:");
+                for (Map.Entry<String, Object> entry : statInfo.entrySet()) {
+                    System.out.println(entry.getKey() + " : " + entry.getValue());
+                }
+
+                System.out.println("--------------------------------------------------");
+            }
+        } catch (IOException e) {
+            System.err.println("An error occurred while retrieving process information: " + e.getMessage());
+        }
+    }
+
+    private static List<Integer> getActivePIDs() throws IOException {
+        List<Integer> pidList = new ArrayList<>();
+        ProcessBuilder processBuilder = new ProcessBuilder("ps", "-e", "-o", "pid=");
+        Process process = processBuilder.start();
+
+        // Read the output of the `ps` command
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                try {
+                    // Convert PID from string to integer and add to list
+                    int pid = Integer.parseInt(line.trim());
+                    pidList.add(pid);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid PID: " + line);
+                }
+            }
+        }
+        return pidList;
     }
 
     public static void main(String[] args){
@@ -119,7 +197,8 @@ public class CLI {
 
         options = new Options();
         options.addOption(cpu);
-        options.addOption(busses);
+        options.addOption(usb);
+        options.addOption(pci);
         options.addOption(memory);
         options.addOption(process);
         options.addOption(help);
@@ -129,7 +208,8 @@ public class CLI {
             // check to see that only one argument has been parsed
             int argCount = 0;
             if (cl.hasOption(cpu.getLongOpt())) {argCount++;}
-            if (cl.hasOption(busses.getLongOpt())) {argCount++;}
+            if (cl.hasOption(usb.getLongOpt())) {argCount++;}
+            if (cl.hasOption(pci.getLongOpt())) {argCount++;}
             if (cl.hasOption(memory.getLongOpt())) {argCount++;}
             if (cl.hasOption(process.getLongOpt())) {argCount++;}
 
@@ -142,9 +222,11 @@ public class CLI {
                 } else {
                     cpuInfo(args[1]);
                 }
-            } else if (cl.hasOption(busses.getLongOpt())) {
-                System.out.println("busses");
-            } else if (cl.hasOption(memory.getLongOpt())) {
+            } else if (cl.hasOption(usb.getLongOpt())) {
+                usbInfo();                                                                     //see about vendor and product id
+            } else if(cl.hasOption(pci.getLongOpt())){
+                pciInfo();
+            }else if (cl.hasOption(memory.getLongOpt())) {
                 if (args[1] == null){
                     memoryInfo("mb");
                 } else if (args[1].equals("kb")){

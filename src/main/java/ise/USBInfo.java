@@ -40,21 +40,21 @@ public class USBInfo {
     }
 
     //  Each of these are the methods from the previous block of code.
-    private static int getBusCount() {
+    public static int getBusCount() {
         return getCountFromCommand(LSUSB_COMMAND, "Bus");
     }
     //  Each method runes the command ``lsusb`` and looks for a keyword that is associated with the correct response.
 //  For ,devices it looks fof the line that starts with the keyword Device.
 //  For ,IDs it looks for the keyword ``id`` which denotes the function line from the pci info.
-    private static int getDeviceCount() {
+    public static int getDeviceCount() {
         return getCountFromCommand(LSUSB_COMMAND, "Device");
     }
 
-    private static String getVendorID() {
+    public static String getVendorID() {
         return getIDFromCommand(LSUSB_COMMAND, "ID");
     }
 
-    private static String getProductID() {
+    public static String getProductID() {
         return getIDFromCommand(LSUSB_COMMAND, "ID");
     }
 

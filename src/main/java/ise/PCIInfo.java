@@ -50,22 +50,22 @@ public class PCIInfo {
 
 
     // Each of these are the methods from the previous block of code.
-    private static int getBusCount() {
+    static int getBusCount() {
         return getCountFromCommand(LSPCI_COMMAND, "Bus");
     }
 
     // Each method runes the command ``lspci`` and looks for a keyword that is associated with the correct response.
 // For ,devices it looks fof the line that starts with the keyword Device.
 // For ,functions it looks for the keyword ``:`` which denotes the function line from the pci info.
-    private static int getDeviceCount() {
+    static int getDeviceCount() {
         return getCountFromCommand(LSPCI_COMMAND, "Device");
     }
 
-    private static int getFunctionCount() {
+    static int getFunctionCount() {
         return getCountFromCommand(LSPCI_COMMAND, ":");
     }
 
-    private static int getFunctionPresent() {
+    static int getFunctionPresent() {
         return getFunctionCount();
     }
 //    information taken from Mark Burkley's Library but is redundant in this code as it producing a not found response.
