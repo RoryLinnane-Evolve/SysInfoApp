@@ -1,27 +1,18 @@
 package ise;
 
-import ise.ProcCPUInfo;
-
 import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * Implements CLI functionality in most basic fashion.
+ * @author Mikey Fennelly
+ * @version 1.0
+ * */
 public class BasicCLI {
     public static void main(String[] args) throws IOException {
-        ProcCPUInfo procCpuInfo = new ProcCPUInfo();
-        List<Map<String, Object>> procCPUInfoTables = procCpuInfo.getProcCPUInfoTables();
-        for (Map<String, Object> procCPUInfoTable : procCPUInfoTables) {
-            KVPPrinter(procCPUInfoTable);
-        }
-    }
-
-    private static void KVPPrinter(Map<String, Object> map) {
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue().toString();
-            System.out.println(key + ": " + value);
-        };
+        dumpAllVFs();
     }
 
     private static void basicReadAndPrint(String filePath) throws FileNotFoundException {
@@ -38,8 +29,23 @@ public class BasicCLI {
     }
 
     private static void dumpAllVFs() throws FileNotFoundException {
+        // Print /proc/cpuinfo
+        System.out.println();
+        System.out.println();
+        System.out.println("/proc/cpuinfo");
+        System.out.println();
         basicReadAndPrint("/proc/cpuinfo");
+        // Print /proc/stat
+        System.out.println();
+        System.out.println();
+        System.out.println("/proc/stat");
+        System.out.println();
         basicReadAndPrint("/proc/stat");
+        // print /proc/meminfo
+        System.out.println();
+        System.out.println();
+        System.out.println("/proc/meminfo");
+        System.out.println();
         basicReadAndPrint("/proc/meminfo");
     }
 }
