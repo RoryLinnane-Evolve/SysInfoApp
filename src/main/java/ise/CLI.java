@@ -4,10 +4,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.*;
 import org.apache.commons.lang3.*;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.rmi.MarshalException;
 import java.sql.SQLOutput;
 import java.util.*;
@@ -17,6 +14,7 @@ public class CLI {
     private static final Option cpu = new Option("c","cpu",false,"display  cpu information");
     private static final Option usb = new Option("u","usb",false,"display usb information");
     private static final Option pci = new Option("p","pci",false,"display pci information");
+    private static final Option disk = new Option("d","disk",false,"display disk information");
     private static final Option memory = new Option("m","memory",false,"display  memory information");
     private static final Option process = new Option("P","Process",false, "display process information");
     private static final Option server = new Option("s","server",false,"start server features");
@@ -138,6 +136,31 @@ public class CLI {
         System.out.println("Function Present: " + functionPresent);
     }
 
+    public static void diskInfo(){
+        // Capture the output of DiskInfo's main method
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(outputStream);
+
+        // Redirect System.out to our print stream
+        PrintStream originalOut = System.out;
+        System.setOut(printStream);
+
+        try {
+            // Call the main method of DiskInfo
+            DiskInfo.main(new String[]{});
+        } catch (IOException e) {
+            System.err.println("Error executing DiskInfo: " + e.getMessage());
+        } finally {
+            // Restore the original System.out
+            System.setOut(originalOut);
+        }
+
+        // Get the output as a string
+        String output = outputStream.toString();
+
+        // Print the output
+        System.out.println(output);
+    }
     public static void processInfo(){
         // Instantiate ProcPIDStatus and ProcPIDStat
         ProcPIDStatus procPIDStatus = new ProcPIDStatus();
@@ -206,6 +229,7 @@ public class CLI {
         options.addOption(cpu);
         options.addOption(usb);
         options.addOption(pci);
+        options.addOption(disk);
         options.addOption(memory);
         options.addOption(process);
         options.addOption(server);
@@ -218,6 +242,7 @@ public class CLI {
             if (cl.hasOption(cpu.getLongOpt())) {argCount++;}
             if (cl.hasOption(usb.getLongOpt())) {argCount++;}
             if (cl.hasOption(pci.getLongOpt())) {argCount++;}
+            if (cl.hasOption(disk.getLongOpt())) {argCount++;}
             if (cl.hasOption(memory.getLongOpt())) {argCount++;}
             if (cl.hasOption(process.getLongOpt())) {argCount++;}
             if (cl.hasOption(server.getLongOpt())) {argCount++;}
@@ -235,14 +260,16 @@ public class CLI {
                 usbInfo();                                                                     //see about vendor and product id
             } else if(cl.hasOption(pci.getLongOpt())){
                 pciInfo();
-            }else if (cl.hasOption(memory.getLongOpt())) {
+            } else if (cl.hasOption(disk.getLongOpt())) {
+                diskInfo();
+            } else if (cl.hasOption(memory.getLongOpt())) {
                 if (args[1] == null){
                     memoryInfo("mb");
                 } else if (args[1].equals("kb")){
                     memoryInfo("kb");
                 } else if (args[1].equals("mb")){
                     memoryInfo("mb");
-                } else if (args[1].equals("gb")){
+                } else if (args[1].equals("gb")) {
                     memoryInfo("gb");
                 } else {
                     printHelp(options);
