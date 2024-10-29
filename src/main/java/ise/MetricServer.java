@@ -27,42 +27,45 @@ import java.util.Map;
 public class MetricServer {
 
     // Create gauge metrics for system memory properties
-    static final Gauge totalMemory = Gauge.build()
+    final Gauge totalMemory = Gauge.build()
             .name("system_memory_total_kilobytes")
             .help("Total system memory in kilobytes.")
             .register();
 
-    static final Gauge freeMemory = Gauge.build()
+    final Gauge freeMemory = Gauge.build()
             .name("system_memory_free_kilobytes")
             .help("Free system memory in kilobytes.")
             .register();
 
-    static final Gauge systemMemoryUsage = Gauge.build()
+    final Gauge systemMemoryUsage = Gauge.build()
             .name("system_memory_usage")
             .help("System memory usage percentage.")
             .register();
 
-    static final Gauge systemCPUMHz = Gauge.build()
+    final Gauge systemCPUMHz = Gauge.build()
             .name("system_CPU_MHz")
             .help("CPU clock speed in megahertz.")
             .register();
 
-    static final Gauge processInfo = Gauge.build()
+    final Gauge processInfo = Gauge.build()
             .name("system_process_info")
             .help("Information about system processes")
             .labelNames("pid", "name", "state")
             .register();
 
-    // REPLACE THIS WITH YOUR MACHINES IP ADDRESS
-    private static final String localIp = "172.27.254.4";
-    private static final int port = 8080;
+    private String IPAddress ;
+    private int port;
+
+    public MetricServer(String _IPAddress, int _port){
+        IPAddress = _IPAddress;
+        port = _port;
+    }
 
 
-    public static void main(String[] args) throws IOException {
-
+    public void start() throws IOException{
         // Starts a http server with the specified port and IP
         // metrics are exposed at <localIp>:port/metrics
-        InetSocketAddress address = new InetSocketAddress(localIp, port);
+        InetSocketAddress address = new InetSocketAddress(IPAddress, port);
         HTTPServer server = new HTTPServer.Builder().withInetSocketAddress(address).build();
 
         //creating the thread for the memory and cpu metrics to be updated
@@ -88,7 +91,7 @@ public class MetricServer {
         memAndCPU.start();
     }
 
-    public static void systemMemmoryAndCPUUpdater() throws Exception{
+    private void systemMemmoryAndCPUUpdater() throws Exception{
 
         //creating the object for cpu information
         VirtualFileInfo cpuinfo = new VirtualFileInfo("/proc/cpuinfo");
@@ -109,6 +112,11 @@ public class MetricServer {
                 //Update cpu mhz in the hashtable
                 cpuinfo.setHashtable();
 
+                //TODO: Calculate CPU Usage
+
+                //TODO: Collect PCI, USB and disk information
+
+
                 //retrieve it from Hashtable and update gauge
                 double cpuMHz = Double.parseDouble(cpuinfo.fileInfo.get("cpu MHz"));
                 systemCPUMHz.set(cpuMHz);
@@ -121,9 +129,9 @@ public class MetricServer {
         }
     }
 
-    public static void processesUpdater() throws Exception{
-        ProcStat proc = new ProcStat();
+    private void processesUpdater() throws Exception{
 
+        ProcPIDStat proc = new ProcPIDStat();
         while (true){
             try{
                 //Get process
@@ -132,7 +140,8 @@ public class MetricServer {
                 //Loop through the process ids
                 for (int id : pids) {
                     //gets the process infromation for the current id
-                    Map<String, Object> procInfo = proc.getProcessInfo(id);
+
+                    Map<String, Object> procInfo = proc.getProcPIDStatInfo(id);
 
                     //updates the gauge list for the current process
                     processInfo.labels(
