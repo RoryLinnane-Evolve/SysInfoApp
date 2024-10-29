@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class ProcStat {
+class ProcPIDStat {
     public static void main(String[] args) throws IOException {
         Map<String, Object> procPidStat = parseProcPIDStat(3157);
 
