@@ -1,4 +1,4 @@
-package main.java.ise;
+package ise;
 import org.apache.commons.cli.*;
 
 import java.io.*;
