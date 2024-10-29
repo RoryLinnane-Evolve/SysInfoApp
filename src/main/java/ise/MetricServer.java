@@ -17,6 +17,8 @@ import ise.SystemMemoryInfo;
 import java.lang.Math;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -54,7 +56,13 @@ public class MetricServer {
 
     public static void main(String[] args) throws IOException {
         // Starts a http server
-        HTTPServer server = new HTTPServer(8080);
+        // REPLACE THIS WITH YOUR MACHINES IP ADDRESS
+        String localIp = "172.27.254.4";
+        int port = 8080;
+        InetSocketAddress address = new InetSocketAddress(localIp, port);
+
+        HTTPServer server = new HTTPServer.Builder().withInetSocketAddress(address).build();
+
 
 
         Thread memAndCPU = new Thread(() -> {
@@ -117,7 +125,8 @@ public class MetricServer {
                 ArrayList<Integer> pids = SystemProcessInfo.getAllRunningPIDs();
                 for (int id : pids) {
                     idss = id;
-                    Map<String, Object> procInfo = proc.getProcessInfo(id);
+                    //TODO: add process information
+                    //Map<String, Object> procInfo = proc.getProcessInfo(id);
 
 //                    processInfo.labels(
 //                            String.valueOf(),
