@@ -20,7 +20,7 @@ import java.lang.Process;
 USB Info Class
 */
 public class USBInfo {
-    //  Defines the command to be the Linux command lsusb, to pull the information about the usb from the device.
+    //  Defines the command to be the Linux command lsusb, to pull the information about the pci from the device.
     private static final String LSUSB_COMMAND = "lsusb";
     //  Start point for the program. Also declares that there might be and IOException.
     public static void main(String[] args) throws IOException {

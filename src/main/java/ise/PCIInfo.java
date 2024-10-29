@@ -1,7 +1,7 @@
 /*
-Package for the ISE Final Project of Block 1 of Frist Year.
+Package for the ISE Final Project of Block 1 of First Year.
  */
-package ise;
+package main.java.ise;
 
 
 
@@ -24,7 +24,7 @@ public class PCIInfo {
     //  Defines the command to be the Linux command lspci, to pull the information about the pci from the device.
     private static final String LSPCI_COMMAND = "lspci";
 
-    //  Start point for the program. Also declares that there might be and IOException.
+        //  Start point for the program. Also declares that there might be and IOException.
     public static void main(String[] args) throws IOException {
 
 //      Calls each method i.e. Bus Count and output prints a message.
@@ -40,7 +40,7 @@ public class PCIInfo {
         int functionPresent = getFunctionPresent();
         System.out.println("Function Present: " + functionPresent);
 
-//        information taken from Mark Burkley's Library but is redundant in this code as it producing a ot found response.
+//        information taken from Mark Burkley's Library but is redundant in this code as it producing a not found response.
 //        String vendorID = getVendorID();
 //        System.out.println("Vendor ID: " + vendorID);
 //
@@ -55,10 +55,9 @@ public class PCIInfo {
     private static int getBusCount() {
         return getCountFromCommand(LSPCI_COMMAND, "Bus");
     }
-
-    // Each method runes the command ``lspci`` and looks for a keyword that is associated with the correct response.
-// For devices it looks fof the line that starts with the keyword Device.
-// For functions it looks for the keyword ``:`` which denotes the function line from the pci info.
+// Each method runes the command ``lspci`` and looks for a keyword that is associated with the correct response.
+// For ,devices it looks fof the line that starts with the keyword Device.
+// For ,functions it looks for the keyword ``:`` which denotes the function line from the pci info.
     private static int getDeviceCount() {
         return getCountFromCommand(LSPCI_COMMAND, "Device");
     }
@@ -70,14 +69,14 @@ public class PCIInfo {
     private static int getFunctionPresent() {
         return getFunctionCount();
     }
-
-    private static String getVendorID() {
-        return getIDFromCommand(LSPCI_COMMAND, "ID");
-    }
-
-    private static String getProductID() {
-        return getIDFromCommand(LSPCI_COMMAND, "ID");
-    }
+//    information taken from Mark Burkley's Library but is redundant in this code as it producing a not found response.
+//    private static String getVendorID() {
+//        return getIDFromCommand(LSPCI_COMMAND, "ID");
+//    }
+//
+//    private static String getProductID() {
+//        return getIDFromCommand(LSPCI_COMMAND, "ID");
+//    }
 
 
 
@@ -105,7 +104,7 @@ public class PCIInfo {
             return -1;
         }
     }
-    //  This is the Method(s) execution.
+//  This is the Method(s) execution.
 //  Takes in two parameters, the command and the IDType/Keyword.
     private static String getIDFromCommand(String command, String idType) {
 //      Runs the command by using Java's Runtime class.
@@ -119,7 +118,7 @@ public class PCIInfo {
                     .filter(line -> line.contains(idType))
 //                  Finds the first matching line
                     .findFirst()
-//                  If the line if found, it splits the at idType
+//                  If the line is found, it splits the at idType
 //                  It then removes any whitespace and then splits the line again, leaving the ID.
                     .map(line -> line.split(idType)[1].trim().split("\\s+")[0])
 //                  If the line is not found, it produces the output, Not Found thus alerting the user.
@@ -133,4 +132,3 @@ public class PCIInfo {
             return "Error";
         }
     }
-}
