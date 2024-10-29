@@ -91,15 +91,19 @@ public class ProcPIDStatus {
 
         Map<String, Object> thisProcess = new Hashtable<String, Object>();
         for (String line : lines) {
-            if (line.contains("x86_Thread_features")) {
-                continue;
-            }
+            try{
+                if (line.contains("x86_Thread_features")) {
+                    continue;
+                }
 
-            KVP kvp = parser.process(":", line);
-            if (kvp.getValue()==null || kvp.getKey()==null) {
-                System.out.println("unable to parse line: " + line);
-            } else {
-                thisProcess.put(kvp.getKey(), kvp.getValue());
+                KVP kvp = parser.process(":", line);
+                if (kvp.getValue()==null || kvp.getKey()==null) {
+                    System.out.println("unable to parse line: " + line);
+                } else {
+                    thisProcess.put(kvp.getKey(), kvp.getValue());
+                }
+            }catch(Exception x){
+                x.printStackTrace();
             }
         }
 
