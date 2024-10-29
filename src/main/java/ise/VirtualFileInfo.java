@@ -95,7 +95,7 @@ class KVPParser {
                 processedKVP.setValue(returnedValue);
             }
         } catch (Exception e) {
-            throw new KVPLineParsingException(line);
+            //throw new KVPLineParsingException(line);
         }
         return processedKVP;
     }

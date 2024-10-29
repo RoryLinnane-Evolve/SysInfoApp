@@ -1,7 +1,7 @@
 /**
  * This is the file for the server that recieves get requests
  * from prometheus and responds with the data in the gauges set out below.
- * The data is set every 4 seconds
+ * The data is set every 4 seconds. There is 2 threads running simultaneously
  *
  * @author Rory Linnane
  * @version 1.0
@@ -53,18 +53,19 @@ public class MetricServer {
             .labelNames("pid", "name", "state")
             .register();
 
+    // REPLACE THIS WITH YOUR MACHINES IP ADDRESS
+    private static final String localIp = "172.27.254.4";
+    private static final int port = 8080;
+
 
     public static void main(String[] args) throws IOException {
-        // Starts a http server
-        // REPLACE THIS WITH YOUR MACHINES IP ADDRESS
-        String localIp = "172.27.254.4";
-        int port = 8080;
-        InetSocketAddress address = new InetSocketAddress(localIp, port);
 
+        // Starts a http server with the specified port and IP
+        // metrics are exposed at <localIp>:port/metrics
+        InetSocketAddress address = new InetSocketAddress(localIp, port);
         HTTPServer server = new HTTPServer.Builder().withInetSocketAddress(address).build();
 
-
-
+        //creating the thread for the memory and cpu metrics to be updated
         Thread memAndCPU = new Thread(() -> {
             try {
                 systemMemmoryAndCPUUpdater();
@@ -73,6 +74,7 @@ public class MetricServer {
             }
         });
 
+        //creating the thread for the process metrics to be updated
         Thread procs = new Thread(() -> {
             try {
                 processesUpdater();
@@ -80,13 +82,17 @@ public class MetricServer {
                 throw new RuntimeException(e);
             }
         });
+
+        //starting the threads
         procs.start();
         memAndCPU.start();
     }
 
     public static void systemMemmoryAndCPUUpdater() throws Exception{
+
+        //creating the object for cpu information
         VirtualFileInfo cpuinfo = new VirtualFileInfo("/proc/cpuinfo");
-        ProcStatVF coresinfo = new ProcStatVF("/proc/stat");
+
         while(true){
             try{
                 // Get system memory information
@@ -96,48 +102,50 @@ public class MetricServer {
                 totalMemory.set(mem.total);
                 freeMemory.set(mem.free);
 
-                // get the memory usage percentage by dividing the (total memory - available memory) by the total memory and multiplying by 100
-                double memusage = (double)(mem.total-mem.available)/mem.total * 100;
+                // get the memory usage percentage by dividing the (total memory - free memory) by the total memory and multiplying by 100
+                double memusage = (double)(mem.total-mem.free)/(mem.total) * 100;
                 systemMemoryUsage.set(Math.round(memusage));
 
-                //Update cpu mhz
+                //Update cpu mhz in the hashtable
                 cpuinfo.setHashtable();
+
                 //retrieve it from Hashtable and update gauge
                 double cpuMHz = Double.parseDouble(cpuinfo.fileInfo.get("cpu MHz"));
                 systemCPUMHz.set(cpuMHz);
 
-                //Get core info
-                //Hashtable<String, Hashtable<String, Long>> cores = coresinfo.getCPUOccupationTablesJiffies();
-
+                //Delay for 4 seconds
                 Thread.sleep(4000);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
     }
 
     public static void processesUpdater() throws Exception{
         ProcStat proc = new ProcStat();
-        int idss = 0;
+
         while (true){
             try{
                 //Get process
                 ArrayList<Integer> pids = SystemProcessInfo.getAllRunningPIDs();
-                for (int id : pids) {
-                    idss = id;
-                    //TODO: add process information
-                    //Map<String, Object> procInfo = proc.getProcessInfo(id);
 
-//                    processInfo.labels(
-//                            String.valueOf(),
-//                            process.getName(),
-//                            String.valueOf(process.getState())
-//                    ).set(process.getCpuPercent());
+                //Loop through the process ids
+                for (int id : pids) {
+                    //gets the process infromation for the current id
+                    Map<String, Object> procInfo = proc.getProcessInfo(id);
+
+                    //updates the gauge list for the current process
+                    processInfo.labels(
+                            String.valueOf(procInfo.get("Pid")),
+                            String.valueOf(procInfo.get("Name")),
+                            String.valueOf(procInfo.get("State"))
+                    ).set(0);
                 }
+
+                //Delay 4 seconds
                 Thread.sleep(4000);
             } catch (Exception e){
-                System.out.println(idss);
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
     }
