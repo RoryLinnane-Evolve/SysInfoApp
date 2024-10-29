@@ -132,8 +132,15 @@ public class CLI {
         }
     }
 
-    public static void processInfo() throws IOException {
-        System.out.println("I don't know how process info classes work :(");
+    public static void processInfo(){
+        // Call the getAllRunningPIDs method from the SystemProcessInfo class
+        ArrayList<Integer> runningPIDs = SystemProcessInfo.getAllRunningPIDs();
+
+        // Print the retrieved process IDs
+        System.out.println("Currently running process IDs:");
+        for (Integer pid : runningPIDs) {
+            System.out.println(pid);
+        }
     }
 
     public static void main(String[] args){
@@ -153,6 +160,7 @@ public class CLI {
             if (cl.hasOption(cpu.getLongOpt())) {argCount++;}
             if (cl.hasOption(busses.getLongOpt())) {argCount++;}
             if (cl.hasOption(memory.getLongOpt())) {argCount++;}
+            if (cl.hasOption(process.getLongOpt())) {argCount++;}
 
             if (argCount != 1) { // if there is anything other than 1 argument call help
                 printHelp(options);
