@@ -47,41 +47,25 @@ public class PCIInfo {
 //        String productID = getProductID();
 //        System.out.println("Product ID: " + productID);
     }
-    public static String getPCIInformation(){
-        String Data = "";
-        int busCount = getBusCount();
-       Data += "Bus Count: " + busCount + "\n";
-
-        int deviceCount = getDeviceCount();
-        Data += "Device Count: " + deviceCount + "\n";
-
-        int functionCount = getFunctionCount();
-        Data += "Function Count: " + functionCount + "\n";
-
-        int functionPresent = getFunctionPresent();
-        Data += "Functions Present: " + functionPresent + "\n";
-
-        return Data;
-    }
 
 
     // Each of these are the methods from the previous block of code.
-    public static int getBusCount() {
+    private static int getBusCount() {
         return getCountFromCommand(LSPCI_COMMAND, "Bus");
     }
 
     // Each method runes the command ``lspci`` and looks for a keyword that is associated with the correct response.
 // For ,devices it looks fof the line that starts with the keyword Device.
 // For ,functions it looks for the keyword ``:`` which denotes the function line from the pci info.
-    public static int getDeviceCount() {
+    private static int getDeviceCount() {
         return getCountFromCommand(LSPCI_COMMAND, "Device");
     }
 
-    public static int getFunctionCount() {
+    private static int getFunctionCount() {
         return getCountFromCommand(LSPCI_COMMAND, ":");
     }
 
-    public static int getFunctionPresent() {
+    private static int getFunctionPresent() {
         return getFunctionCount();
     }
 //    information taken from Mark Burkley's Library but is redundant in this code as it producing a not found response.
