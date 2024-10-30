@@ -169,8 +169,8 @@ public class CLI {
             // Loop through each PID to retrieve status and stat information
             boolean empty = true;
             for (int pid : activePIDs) {
-                System.out.println("Process Information for PID: " + pid);
                 if (procNo.equals("") || pid == Integer.parseInt(procNo.substring(3))){
+                    System.out.println("Process Information for PID: " + pid);
                     empty = false;
                     // Retrieve process status information for the current PID
                     Map<String, Object> statusInfo = procPIDStatus.getProcessInfo(pid);
