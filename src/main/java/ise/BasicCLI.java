@@ -12,6 +12,8 @@ import java.util.stream.Stream;
  * */
 public class BasicCLI {
     public static void main(String[] args) throws IOException {
+        MetricServer server = new MetricServer("172.27.254.4", 8080);
+        server.start();
         dumpAllVFs();
     }
 

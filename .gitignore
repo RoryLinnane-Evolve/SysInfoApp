@@ -5,5 +5,8 @@
 /.idea/jarRepositories.xml
 /.idea/misc.xml
 /.idea/vcs.xml
-/.idea/uiDesigner.xml
-/src/main/java/ise/ProcStatDemo.java
+.idea/workspace.xml
+/prometheus/prometheus
+/prometheus/promtool
+/prometheus/data/*
+

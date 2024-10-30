@@ -41,8 +41,29 @@ public class    DiskInfo {
         System.out.println("Available Disk(s): " + diskAvailable);
 
     }
-// The methods for the previous code
-    private static int getDiskCount(List<String> dfOutput) {
+  
+    public static String[] getAllDiskInformation() throws IOException {
+        String[] Data = new String[5];
+        List<String> dfOutput = execCommand(DF_COMMAND);
+
+        int diskCount = getDiskCount(dfOutput);
+        Data[0] = "Disk Count: " + diskCount;
+
+        String deviceName = getDeviceName(dfOutput);
+        Data[1] = "Device Name: " + deviceName;
+
+        long diskTotal = getDiskTotal(dfOutput);
+        Data[2] = "Total Disk space: " + diskTotal;
+
+        long diskUsed = getDiskUsed(dfOutput);
+        Data[3] = "Used Disk space: " + diskUsed;
+
+        long diskAvailable = getDiskAvailable(dfOutput);
+        Data[4] = "Available Disk space: " + diskAvailable;
+        return Data;
+    }
+
+  private static int getDiskCount(List<String> dfOutput) {
         return dfOutput.size() - 1;
     }
 
@@ -70,7 +91,13 @@ public class    DiskInfo {
     private static long getDiskAvailable(List<String> dfOutput) {
         return parseDfOutput(dfOutput, 3);
     }
-
+    
+    /**
+    * Parses output of 'df' command on linux
+    * @param List<String> - lines from output of df command
+    * @param int - column index
+    * @return long - total disk space in KB
+    */
     private static long parseDfOutput(List<String> dfOutput, int columnIndex) {
         return dfOutput.stream()
                 .skip(1)
