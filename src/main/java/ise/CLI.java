@@ -265,7 +265,7 @@ public class CLI {
             } else if (cl.hasOption(disk.getLongOpt())) {
                 diskInfo();
             } else if (cl.hasOption(memory.getLongOpt())) {
-                if (args[1] == null){
+                if (args[1] == ""){
                     memoryInfo("mb");
                 } else if (args[1].equals("kb")){
                     memoryInfo("kb");
