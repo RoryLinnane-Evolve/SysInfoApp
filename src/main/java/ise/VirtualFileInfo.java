@@ -94,8 +94,8 @@ class KVPParser {
                     processedKVP.setKey(key);
                     processedKVP.setValue(returnedValue);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (KVPLineParsingException e) {
+                throw new KVPLineParsingException(line);
             }
         return processedKVP;
     }
@@ -208,7 +208,7 @@ class KVPParser {
         }
     }
 
-    class KVPLineParsingException extends RuntimeException {
+    static class KVPLineParsingException extends RuntimeException {
         public KVPLineParsingException(String line) {
             super("KVPParsingException: Unable to parse line: " + line + ". " );
         }
