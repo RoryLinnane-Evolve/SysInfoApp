@@ -8,7 +8,7 @@
   <artifactId>host-info-agent</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>host-info-agent</name>
+  <name>RCHM</name>
   <description>A simple host-info-agent.</description>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
