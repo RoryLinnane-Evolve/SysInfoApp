@@ -6,26 +6,21 @@
  */
 package ise;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+public abstract class Sysinfo {
 
-public class Sysinfo {
-    public static void main(String[] args) throws IOException {
-//        ArrayList<Integer> pIds = SystemProcessInfo.getAllRunningPIDs();
-//
-//        for (Map.Entry<String, String[]> entry : hashMap.entrySet()) {
-//            String key = entry.getKey();
-//            String[] values = entry.getValue();
-//            System.out.println("Key: " + key + " | Values: " + Arrays.toString(values));
-//        }
+    private final String name;
+
+    public Sysinfo(String name) {
+        this.name = name;
     }
-}
 
-interface SysinfoInterface {
-    ArrayList<Integer> getRunningPIDs();
-    SystemProcessInfo getProcessInfo(int pid);
-    SystemMemoryInfo getSystemMemoryInfo();
+    public void printConsoleHeader() {
+        System.out.println("===================================================");
+        System.out.println(name);
+        System.out.println("===================================================");
+    }
+
+    public abstract void printToConsole();
+
+    public abstract void sendToOpenTelemetry();
 }

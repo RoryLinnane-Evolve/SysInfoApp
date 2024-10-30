@@ -1,4 +1,4 @@
-= host-info-agent
+= SysInfoApp
 :toc:
 
 This is the documentation for the host-info-agent (core) of the project. This component is the basis of all project extensions such as CLI tools.
@@ -31,6 +31,20 @@ Gives information about processes running on a host. Can be potentially used to 
 === Server
 This is a server process that can be started via the CLI to constantly run on a specified port. It accepts HTTPS requests and will retrieve and respond with system information on request.
 
-== Install
+== Install & Run
 
-== Deploy
+----
+git clone git@github.com:RoryLinnane-Evolve/SysInfoApp.git
+----
+
+----
+cd SysInfoApp
+----
+
+----
+mvn compile
+----
+
+----
+java -cp target/classes ise.BasicCLI
+----

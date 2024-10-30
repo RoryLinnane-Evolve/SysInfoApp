@@ -2,6 +2,7 @@ package ise;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -9,12 +10,14 @@ import java.util.stream.Stream;
  * @author Mikey Fennelly
  * @version 2.0
  */
-public class ProcCPUInfo  {
+public class ProcCPUInfo extends Sysinfo  {
     private final List<String> parseIntItemsList = Arrays.asList("clflush size", "cache alignment", "processor", "cpu family", "model", "stepping", "physical id", "siblings", "core id", "cpu cores", "apicid", "initial apicid", "cpuid level","cflush size", "cache_alignment");
     private final List<String> parseBooleanFromYesNoItemsList = Arrays.asList("fpu", "fpu_exception", "wp");
     private final List<String> splitOnSpaceItemsList = Arrays.asList("flags", "vmx flags", "bugs");
     private final List<String> parseDoubleItemsList = Arrays.asList("cpu MHz", "bogomips");
     private final List<String> trimOnlyItemsList = Arrays.asList("vendor_id", "model name", "microcode");
+
+
 
     private ConversionOperation processAddressSizes = (unprocessedVal -> {
         String[] splitUnprocessedVal = unprocessedVal.split(", ");
@@ -27,6 +30,10 @@ public class ProcCPUInfo  {
         addressSizes.put("bitsVirtual", bitsVirtual);
         return addressSizes;
     });
+
+    public ProcCPUInfo() {
+        super("CPU Info");
+    }
 
     public List<Map<String, Object>> getProcCPUInfoTables () throws IOException {
         List<Map<String, Object>> procCPUInfoTables = new ArrayList<Map<String, Object>>();
@@ -46,13 +53,13 @@ public class ProcCPUInfo  {
         // iterate through each line, and parse each line
         Map<String, Object> thisCPU = new Hashtable<String, Object>();
         for (String line : lines) {
-            if (line.trim().isEmpty() || line.substring(line.indexOf(":"), line.length() -1).trim().isEmpty()) {
-                continue;
-            }
-            if (line.contains("power management")) {
+            if (line.contains("power management:")) {
                 // if a "power management" line is encountered, append current cpu and start the creation of a new one
                 procCPUInfoTables.add(thisCPU);
                 thisCPU = new Hashtable<String, Object>();
+                continue;
+            }
+            if (line.trim().isEmpty() || line.substring(line.indexOf(":"), line.length() -1).trim().isEmpty()) {
                 continue;
             }
 
@@ -61,5 +68,26 @@ public class ProcCPUInfo  {
         }
 
         return procCPUInfoTables;
+    }
+
+    @Override
+    public void printToConsole() {
+        this.printConsoleHeader();
+        try {
+            List<Map<String, Object>> cpus = this.getProcCPUInfoTables();
+            cpus.forEach(cpuMap -> {
+                System.out.println("CPU " + cpuMap.get("processor") + ": ");
+                cpuMap.entrySet().forEach(entry -> {
+                    System.out.println("    " + entry.getKey() + ": " + entry.getValue());
+                });
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void sendToOpenTelemetry() {
+        // TODO
     }
 }
