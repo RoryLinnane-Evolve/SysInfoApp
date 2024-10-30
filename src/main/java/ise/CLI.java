@@ -4,7 +4,10 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.*;
 import org.apache.commons.lang3.*;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.io.*;
+import java.net.ServerSocket;
 import java.rmi.MarshalException;
 import java.sql.SQLOutput;
 import java.util.*;
@@ -54,6 +57,30 @@ public class CLI {
 
         // return the display bar and percentage
         return progressBar.toString();
+    }
+
+    private static String findIp(){
+        String address = "";
+        try {
+            // Get the local host address
+            InetAddress inetAddress = InetAddress.getLocalHost();
+
+            // Print IP Address
+            address = inetAddress.getHostAddress();
+        } catch (UnknownHostException e) {
+            System.out.println("Could not get IP address: " + e.getMessage());
+        }
+        return address;
+    }
+
+    private static int findFreePort(){
+        try (ServerSocket socket = new ServerSocket(0)) {
+            // Bind the socket to a free port and return it
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            System.out.println("Could not find a free port: " + e.getMessage());
+            return -1; // Return -1 to indicate failure
+        }
     }
     private static void memoryInfo(String unit) throws IOException {
         SystemMemoryInfo memInfo = new SystemMemoryInfo();
@@ -218,11 +245,14 @@ public class CLI {
         return pidList;
     }
 
-    public static void serverRun(){
-        MetricServer server = new MetricServer("172.27.254.4,8080");
-        server.start();
-
-        System.out.println("Server started at 172.27.254.4 : 8080");
+    public static void serverRun(String ip, int port) throws IOException {
+        if (port != -1) {
+            System.out.println("Server started at " + ip + " : " + port);
+            MetricServer server = new MetricServer(ip, port);
+            server.start();
+        } else {
+            System.out.println("No free port found.");
+        }
     }
     public static void main(String[] args){
         clp = new DefaultParser();
@@ -283,7 +313,7 @@ public class CLI {
                     processInfo(args[1]);
                 }
             } else if (cl.hasOption(server.getLongOpt())){
-                serverRun();
+                serverRun(findIp(),findFreePort());
             }else if (cl.hasOption(help.getLongOpt())) {
                 printHelp(options);
             } else {
