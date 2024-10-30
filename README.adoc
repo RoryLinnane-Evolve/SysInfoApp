@@ -48,5 +48,3 @@ mvn compile
 ----
 java -cp target/classes ise.BasicCLI
 ----
-
-== Deploy
