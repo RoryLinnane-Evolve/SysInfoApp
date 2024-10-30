@@ -158,6 +158,35 @@ public class CLI {
         System.out.println("Function Present: " + functionPresent);
     }
 
+    public static void pciDetailed(String choice){
+        switch (choice) {
+            case "Bus" -> {
+                List<String> BusList = PCIInfo.getBusList();
+                if (BusList.isEmpty()){
+                    System.out.println("empty");
+                }
+                System.out.println("Bus Info:");
+                for (String item : BusList) {
+                    System.out.println("    " + item);
+                }
+            }
+            case "Device" -> {
+                List<String> DeviceList = PCIInfo.getDeviceList();
+                System.out.println("Device Info:");
+                for (String item : DeviceList) {
+                    System.out.println("    " + item);
+                }
+            }
+            case "Function" -> {
+                List<String> FunctionList = PCIInfo.getFunctionList();
+                System.out.println("Function Info:");
+                for (String item : FunctionList) {
+                    System.out.println("    " + item);
+                }
+            }
+            default -> printHelp(options);
+        }
+    }
     public static void diskInfo(){
         // Capture the output of DiskInfo's main method
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -291,7 +320,11 @@ public class CLI {
             } else if (cl.hasOption(usb.getLongOpt())) {
                 usbInfo();                                                                     //see about vendor and product id
             } else if(cl.hasOption(pci.getLongOpt())){
-                pciInfo();
+                if (args.length == 1) {
+                    pciInfo();
+                } else {
+                    pciDetailed(args[1]);
+                }
             } else if (cl.hasOption(disk.getLongOpt())) {
                 diskInfo();
             } else if (cl.hasOption(memory.getLongOpt())) {

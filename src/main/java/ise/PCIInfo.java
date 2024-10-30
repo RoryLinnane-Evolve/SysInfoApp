@@ -8,14 +8,19 @@ package ise;
 /*
 Java Imports
  */
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /*
 Java process handling
  */
 import java.lang.Process;
+import java.util.List;
 
 /*
 PCI Info Class
@@ -54,6 +59,10 @@ public class PCIInfo {
         return getCountFromCommand(LSPCI_COMMAND, "Bus");
     }
 
+    static List<String> getBusList() {
+        return getListFromCommand(LSPCI_COMMAND, "Bus");
+    }
+
     // Each method runes the command ``lspci`` and looks for a keyword that is associated with the correct response.
 // For ,devices it looks fof the line that starts with the keyword Device.
 // For ,functions it looks for the keyword ``:`` which denotes the function line from the pci info.
@@ -61,8 +70,16 @@ public class PCIInfo {
         return getCountFromCommand(LSPCI_COMMAND, "Device");
     }
 
+    static List<String> getDeviceList() {
+        return getListFromCommand(LSPCI_COMMAND, "Device");
+    }
+
     static int getFunctionCount() {
         return getCountFromCommand(LSPCI_COMMAND, ":");
+    }
+
+    static List<String> getFunctionList() {
+        return getListFromCommand(LSPCI_COMMAND, ":");
     }
 
     static int getFunctionPresent() {
@@ -102,6 +119,29 @@ public class PCIInfo {
         }
     }
 
+    private static List<String> getListFromCommand(String command, String startsWith) {
+        try {
+            // Start the process with the provided command
+            Process process = Runtime.getRuntime().exec(command);
+
+            // Create a BufferedReader to read the output
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            // Collect matching lines into a list
+            List<String> List = new ArrayList<>();
+
+            reader.lines()
+                    .filter(line -> line.startsWith(startsWith)) // Filter lines that start with the specified keyword
+                    .forEach(List::add);
+            return List;
+
+        } catch (IOException e) {
+            // Log the error and return an empty list if an exception occurs
+            System.err.println("An error occurred while executing the command: " + e.getMessage());
+            return Collections.emptyList(); // Return an empty list on error
+
+        }
+    /*
     //  This is the Method(s) execution.
 //  Takes in two parameters, the command and the IDType/Keyword.
     private static String getIDFromCommand(String command, String idType) {
@@ -129,5 +169,7 @@ public class PCIInfo {
             System.err.println("Error executing " + command + " command: " + e.getMessage());
             return "Error";
         }
+    }
+     */
     }
 }

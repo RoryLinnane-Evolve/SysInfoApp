@@ -55,7 +55,7 @@ public class USBInfo {
     }
 
     //  Each of these are the methods from the previous block of code.
-    private static int getBusCount() {
+    static int getBusCount() {
         return getCountFromCommand(LSUSB_COMMAND, "Bus");
     }
 
@@ -64,7 +64,7 @@ public class USBInfo {
      * gets number of devices
      * @return int
      * */
-    private static int getDeviceCount() {
+    static int getDeviceCount() {
         return getCountFromCommand(LSUSB_COMMAND, "Device");
     }
 
@@ -76,11 +76,11 @@ public class USBInfo {
         return getBcdFromCommand(LSUSB_COMMAND, "bcdUSB");
     }
 
-    private static String getVendorID() {
+    static String getVendorID() {
         return getIDFromCommand(LSUSB_COMMAND, "ID");
     }
 
-    private static String getProductID() {
+    static String getProductID() {
         return getIDFromCommand(LSUSB_COMMAND, "ID");
     }
 
