@@ -28,7 +28,7 @@ public class CLI {
         HelpFormatter formatter = new HelpFormatter();
         PrintWriter pw = new PrintWriter(System.out);
         pw.println();
-        formatter.printUsage(pw, 100, "java -jar RCHM.jar [options] [extra arguments]");
+        formatter.printUsage(pw, 100, "java -jar host-info-agent-1.0-SNAPSHOT.jar [options] [extra arguments]");
         formatter.printOptions(pw, 100, options, 2, 5);
         pw.close();
     }
@@ -219,10 +219,10 @@ public class CLI {
     }
 
     public static void serverRun(){
-        //MetricServer server = new MetricServer("172.27.254.4,8080");
-        //server.start();
+        MetricServer server = new MetricServer("172.27.254.4,8080");
+        server.start();
 
-        //System.out.println("Server started at 172.27.254.4 : 8080");
+        System.out.println("Server started at 172.27.254.4 : 8080");
     }
     public static void main(String[] args){
         clp = new DefaultParser();
