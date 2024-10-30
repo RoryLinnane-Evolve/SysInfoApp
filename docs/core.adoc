@@ -32,3 +32,9 @@ Reads the /proc/<pid>/status virtual file to return a class with properties such
 
 Has methods to get global system information, such as the PIDs of all running processes on the host:
 
+=== MetricServer
+This class starts a server at the specified IP and port which exposes the metrics for get requests at <the specified IP>:<port>/metrics
+
+==== Methods
+The start() method starts the HttpServer and starts 2 threads that constantly update the prometheus gauges.
+

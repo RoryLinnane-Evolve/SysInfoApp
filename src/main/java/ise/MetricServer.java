@@ -23,6 +23,11 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MetricServer {
 
@@ -47,6 +52,11 @@ public class MetricServer {
             .help("CPU clock speed in megahertz.")
             .register();
 
+    final Gauge systemCPUUsage = Gauge.build()
+            .name("system_CPU_usage")
+            .help("The percentage cpu usage")
+            .register();
+
     final Gauge processInfo = Gauge.build()
             .name("system_process_info")
             .help("Information about system processes")
@@ -65,6 +75,12 @@ public class MetricServer {
             .labelNames("busCount", "deviceCount", "vendorID", "productID")
             .register();
 
+    final Gauge diskInfo = Gauge.build()
+            .name("system_disk_info")
+            .help("all system disk information")
+            .labelNames("diskCount", "deviceName", "totalDisks", "usedDisks", "availableDisks")
+            .register();
+
     private String IPAddress ;
     private int port;
 
@@ -80,7 +96,6 @@ public class MetricServer {
         InetSocketAddress address = new InetSocketAddress(IPAddress, port);
         HTTPServer server = new HTTPServer.Builder().withInetSocketAddress(address).build();
 
-        //TODO: Collect USB and disk information
 
         //gets the pci info and updates the gauge with the values
         pciInfo.labels(String.valueOf(PCIInfo.getBusCount()),
@@ -93,6 +108,14 @@ public class MetricServer {
                 String.valueOf(USBInfo.getDeviceCount()),
                 String.valueOf(USBInfo.getVendorID()),
                 String.valueOf(USBInfo.getProductID()));
+
+        //gets the disk information and updates gauges with the values
+        String[] diskInformationArray = DiskInfo.getAllDiskInformation();
+        diskInfo.labels(diskInformationArray[0],
+                diskInformationArray[1],
+                diskInformationArray[2],
+                diskInformationArray[3],
+                diskInformationArray[4]);
 
         //creating the thread for the memory and cpu metrics to be updated
         Thread memAndCPU = new Thread(() -> {
@@ -135,19 +158,29 @@ public class MetricServer {
                 double memusage = (double)(mem.total-mem.free)/(mem.total) * 100;
                 systemMemoryUsage.set(Math.round(memusage));
 
+
+
+
+
                 //Update cpu mhz in the hashtable
                 cpuinfo.setHashtable();
-
-                //TODO: Calculate CPU Usage
-
-
-
                 //retrieve it from Hashtable and update gauge
                 double cpuMHz = Double.parseDouble(cpuinfo.fileInfo.get("cpu MHz"));
                 systemCPUMHz.set(cpuMHz);
 
+                //TODO: Calculate CPU Usage
+                List<Long> prevStats = getCPUStats();
                 //Delay for 4 seconds
                 Thread.sleep(4000);
+
+
+
+                List<Long> currStats = getCPUStats();
+
+                // Calculate CPU usage percentage
+                double cpuUsage = calculateCPUUsage(prevStats, currStats);
+                systemCPUUsage.set(cpuUsage);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -169,8 +202,7 @@ public class MetricServer {
                     Map<String, Object> procStatusInfo =  procStatus.getProcessInfo(id);
 
                     Map<String, Object> procStatInfo = procStat.getProcPIDStatInfo(id);
-
-
+                    
                     //updates the gauge list for the current process
                     processInfo.labels(
                             String.valueOf(procStatusInfo.get("Pid")),
@@ -185,5 +217,31 @@ public class MetricServer {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static List<Long> getCPUStats() throws IOException {
+        List<Long> stats = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("/proc/stat"))) {
+            String line = reader.readLine();
+            if (line != null && line.startsWith("cpu ")) {
+                String[] values = line.split("\\s+");
+                for (int i = 1; i < values.length; i++) {
+                    stats.add(Long.parseLong(values[i]));
+                }
+            }
+        }
+        return stats;
+    }
+    private static double calculateCPUUsage(List<Long> prevStats, List<Long> currStats) {
+        long prevIdle = prevStats.get(3) + prevStats.get(4);
+        long currIdle = currStats.get(3) + currStats.get(4);
+
+        long prevTotal = prevStats.stream().mapToLong(Long::longValue).sum();
+        long currTotal = currStats.stream().mapToLong(Long::longValue).sum();
+
+        long totalDiff = currTotal - prevTotal;
+        long idleDiff = currIdle - prevIdle;
+
+        return (totalDiff - idleDiff) * 100.0 / totalDiff;
     }
 }
