@@ -59,7 +59,7 @@ class KVPParser {
     private ArrayList<String> lines = new ArrayList<String>();
 
     /**
-     * Method is used to configure KVPParser based on the behaviour of a virtual file.
+     * Used to configure KVPParser based on the behaviour of a virtual file.
      * @param conversionOperation - the operation that is to be applied to all corresponding values of the keys.
      * @param keys - list of keys whose values require a conversionOperation.
      * @return void
@@ -80,29 +80,29 @@ class KVPParser {
     public KVP process(String split, String line) throws KVPLineParsingException {
         KVP processedKVP = new KVP(null, null);
         try {
-            int keyIndex = line.indexOf(split);
+                int keyIndex = line.indexOf(split);
 
-            if (keyIndex == -1) {
-                throw new KVPLineParsingException(line + "\n split substring: " + split + "not found");
-            }
+                if (keyIndex == -1) {
+                    throw new KVPLineParsingException(line + "\n split substring: " + split + "not found");
+                }
 
-            String key = line.substring(0, keyIndex).trim();
-            String value = line.substring(keyIndex + 1, line.length()).trim();
-            ConversionOperation conversionOperation = keyValueConversionOperationMap.get(key); // get appropriate ConversionOperation for key's corresponding values
-            if (conversionOperation != null) {
-                Object returnedValue = conversionOperation.apply(value);
-                processedKVP.setKey(key);
-                processedKVP.setValue(returnedValue);
+                String key = line.substring(0, keyIndex).trim();
+                String value = line.substring(keyIndex + 1, line.length()).trim();
+                ConversionOperation conversionOperation = keyValueConversionOperationMap.get(key); // get appropriate ConversionOperation for key's corresponding values
+                if (conversionOperation != null) {
+                    Object returnedValue = conversionOperation.apply(value);
+                    processedKVP.setKey(key);
+                    processedKVP.setValue(returnedValue);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            //throw new KVPLineParsingException(line);
-        }
         return processedKVP;
     }
 
     public String[] getLines(String filePath) throws IOException {
         try (Reader file = new FileReader(filePath);
-             BufferedReader reader = new BufferedReader(file)) {
+            BufferedReader reader = new BufferedReader(file)) {
             Stream<String> linesStream = reader.lines();
             return reader.lines().toArray(String[]::new);
         }
