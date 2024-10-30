@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 /*
 Disk Info Class
  */
-public class DiskInfo {
+public class    DiskInfo {
     //  Defines the command to be the Linux command df, to pull the information about the disk from the device.
     private static final String DF_COMMAND = "df";
     //  Start point for the program. Also declares that there might be and IOException.
@@ -41,7 +41,7 @@ public class DiskInfo {
         System.out.println("Available Disk(s): " + diskAvailable);
 
     }
-
+  
     public static String[] getAllDiskInformation() throws IOException {
         String[] Data = new String[5];
         List<String> dfOutput = execCommand(DF_COMMAND);
@@ -62,21 +62,21 @@ public class DiskInfo {
         Data[4] = "Available Disk space: " + diskAvailable;
         return Data;
     }
-// The methods for the pervious code
-    private static int getDiskCount(List<String> dfOutput) {
+
+  private static int getDiskCount(List<String> dfOutput) {
         return dfOutput.size() - 1;
     }
 
     private static String getDeviceName(List<String> dfOutput) {
 //      Converts the list to a stream
         return dfOutput.stream()
-//               Skips the first line, due to it tipically being a header
+//               Skips the first line, due to it typically being a header
                 .skip(1)
 //               Finds the first lien after the header
                 .findFirst()
 //               Line Split
                 .map(line -> line.split("\\s+")[0])
-//               If result is not found it produces an error to notifiy the user
+//               If result is not found it produces an error to notify the user
                 .orElse("Not Found");
     }
 
@@ -91,7 +91,13 @@ public class DiskInfo {
     private static long getDiskAvailable(List<String> dfOutput) {
         return parseDfOutput(dfOutput, 3);
     }
-
+    
+    /**
+    * Parses output of 'df' command on linux
+    * @param List<String> - lines from output of df command
+    * @param int - column index
+    * @return long - total disk space in KB
+    */
     private static long parseDfOutput(List<String> dfOutput, int columnIndex) {
         return dfOutput.stream()
                 .skip(1)

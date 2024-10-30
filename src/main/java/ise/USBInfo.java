@@ -10,6 +10,9 @@ Java Imports
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /*
 Java process handling
@@ -20,8 +23,8 @@ import java.lang.Process;
 USB Info Class
 */
 public class USBInfo {
-    //  Defines the command to be the Linux command lsusb, to pull the information about the pci from the device.
-    private static final String LSUSB_COMMAND = "lsusb";
+    //  Defines the command to be the Linux command lsusb, to pull the information about the usb from the device.
+    private static final String LSUSB_COMMAND = "lsusb -v";
     //  Start point for the program. Also declares that there might be and IOException.
     public static void main(String[] args) throws IOException {
 
@@ -32,6 +35,18 @@ public class USBInfo {
         int deviceCount = getDeviceCount();
         System.out.println("Device Count: " + deviceCount);
 
+        List<String> bcdUSBList = getBcdUSB();
+        System.out.println("BCD USB values:");
+        for (int i = 0; i < bcdUSBList.size(); i++) {
+            System.out.println("Bus " + (i + 1) + ": " + bcdUSBList.get(i));
+        }
+
+        List<String> bNumConfig = getBNumConfig();
+        System.out.println("bNumConfigurations:");
+        for (int i = 0; i < bNumConfig.size(); i++) {
+            System.out.println("bNumConfigurations " + (i + 1) + ": " + bcdUSBList.get(i));
+        }
+
         String vendorID = getVendorID();
         System.out.println("Vendor ID: " + vendorID);
 
@@ -40,21 +55,32 @@ public class USBInfo {
     }
 
     //  Each of these are the methods from the previous block of code.
-    public static int getBusCount() {
+    private static int getBusCount() {
         return getCountFromCommand(LSUSB_COMMAND, "Bus");
     }
-    //  Each method runes the command ``lsusb`` and looks for a keyword that is associated with the correct response.
-//  For ,devices it looks fof the line that starts with the keyword Device.
-//  For ,IDs it looks for the keyword ``id`` which denotes the function line from the pci info.
-    public static int getDeviceCount() {
+
+    /**
+     * FOR FUTURE REFERENCE
+     * gets number of devices
+     * @return int
+     * */
+    private static int getDeviceCount() {
         return getCountFromCommand(LSUSB_COMMAND, "Device");
     }
 
-    public static String getVendorID() {
+    private static List<String> getBNumConfig() {
+        return getBnumFromCommand(LSUSB_COMMAND, "bNumConfig");
+    }
+
+    private static List<String> getBcdUSB() {
+        return getBcdFromCommand(LSUSB_COMMAND, "bcdUSB");
+    }
+
+    private static String getVendorID() {
         return getIDFromCommand(LSUSB_COMMAND, "ID");
     }
 
-    public static String getProductID() {
+    private static String getProductID() {
         return getIDFromCommand(LSUSB_COMMAND, "ID");
     }
 
@@ -80,6 +106,36 @@ public class USBInfo {
             return -1; // Return -1 to indicate an error
         }
     }
+
+    private static List<String> getBcdFromCommand(String command, String bcdType) {
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            return reader.lines()
+                    .filter(line -> line.trim().startsWith(bcdType))
+                    .map(line -> line.trim().split("\\s+")[1])
+                    .collect(   Collectors.toList());
+        } catch (IOException e) {
+            System.err.println("Error executing " + command + " command: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    private static List<String> getBnumFromCommand(String command, String startswith) {
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            return reader.lines()
+                    .filter(line -> line.trim().startsWith(startswith))
+                    .map(line -> line.trim().split("\\s+")[1])
+                    .collect(   Collectors.toList());
+        } catch (IOException e) {
+            System.err.println("Error executing " + command + " command: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+
     //  This is the Method(s) execution.
 //  Takes in two parameters, the command and the IDType/Keyword.
     private static String getIDFromCommand(String command, String idType) {
