@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 enum ProcState {
-    RUN, SLEEP, UNINTERRUPTABLE_SLEEP, STOPPED, ZOMBIE
+    RUN, SLEEP, UNINTERRUPTABLE_SLEEP, STOPPED, ZOMBIE, IDLE
 }
 
 /**
@@ -69,6 +69,9 @@ public class ProcPIDStatus {
                 break;
             case "D (uninterruptable sleep)":
                 stateToReturn = ProcState.UNINTERRUPTABLE_SLEEP;
+                break;
+            case "I (idle)":
+                stateToReturn = ProcState.IDLE;
                 break;
         }
         return stateToReturn;
