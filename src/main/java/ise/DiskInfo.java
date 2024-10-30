@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 /*
 Disk Info Class
  */
-public class DiskInfo {
+public class    DiskInfo {
     //  Defines the command to be the Linux command df, to pull the information about the disk from the device.
     private static final String DF_COMMAND = "df";
     //  Start point for the program. Also declares that there might be and IOException.
