@@ -88,21 +88,16 @@ public class CLI {
       System.out.println();
       // Print the CPU information
       System.out.println("CPU Information:");
-      boolean wrongcpu = true;
       int cpuNumber = 1;
       for (Map<String, Object> cpuTable : cpuInfoTables) {
           if (cpuNo.equals("") || cpuNumber == Integer.parseInt(cpuNo.substring(3))){
               System.out.println("CPU " + cpuNumber + ":");
-              wrongcpu = false;
               for (Map.Entry<String, Object> entry : cpuTable.entrySet()) {
                   System.out.printf("  %s: %s%n", entry.getKey(), entry.getValue());
               }
           }
           cpuNumber++;
           System.out.println();
-          if (wrongcpu){
-              System.out.println("That is not a valid cpu try a different one or use --help");
-          }
       }
     }
 
