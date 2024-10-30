@@ -16,10 +16,11 @@ enum ProcState {
 }
 
 /**
- * Provides information about processes similar to that of running the 'top'/'htop' command
- * in bash
+ * Provides information representing the /proc/<pid>/status virtual file on linux
+ * @author Mikey Fennelly
+ * @version 1.0
  * */
-public class ProcPIDStatus {
+public class ProcPIDStatus extends Sysinfo {
     private final List<String> trimOnlyItemsList = Arrays.asList("Umask", "Name", "Speculation_Store_Bypass", "SpeculationIndirectBranch", "Cpus_allowed", "untag_mask", "SigQ", "CapBnd");
     private final List<String> popThreeCharsReturnIntList = Arrays.asList("VmPeak", "VmSize", "VmLck", "VmPin", "VmHWM", "VmRSS", "RssAnon", "RssFile", "RssShmem", "VmData", "VmStk", "VmExe", "VmLib", "VmPTE", "VmSwap", "HugetlbPages", "SigPnd", "ShdPnd", "SigBlk", "SigIgn", "SigCgt", "CapInh", "CapPrm", "CapEff", "CapAmb");
     private final List<String> parseLongList = Arrays.asList("Seccomp","NoNewPrivs", "Tgid", "Ngid", "Pid", "PPid", "TracerPid", "FDSize", "NStgid", "NSpid", "NSpgid", "NSsid", "Kthread", "CoreDumping", "THP_enabled", "Threads", "voluntary_ctxt_switches", "nonvoluntary_ctxt_switches", "Seccomp_filters", "Mems_allowed_list");
@@ -74,6 +75,10 @@ public class ProcPIDStatus {
         return stateToReturn;
     });
 
+    public ProcPIDStatus() {
+        super(ProcCPUInfo.class.getSimpleName());
+    }
+
     public Map<String, Object> getProcessInfo(int pid) throws IOException {
         List<Map<String, Object>> procCPUInfoTables = new ArrayList<Map<String, Object>>();
 
@@ -104,5 +109,16 @@ public class ProcPIDStatus {
         }
 
         return thisProcess;
+    }
+
+
+    @Override
+    public void printToConsole() {
+
+    }
+
+    @Override
+    public void sendToOpenTelemetry() {
+
     }
 }
