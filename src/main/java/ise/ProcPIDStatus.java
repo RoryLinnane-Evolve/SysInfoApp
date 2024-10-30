@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 enum ProcState {
-    RUN, SLEEP, UNINTERRUPTABLE_SLEEP, STOPPED, ZOMBIE
+    RUN, SLEEP, UNINTERRUPTABLE_SLEEP, STOPPED, ZOMBIE, IDLE
 }
 
 /**
@@ -20,13 +20,12 @@ enum ProcState {
  * in bash
  * */
 public class ProcPIDStatus {
-    private final List<String> trimOnlyItemsList = Arrays.asList("Umask", "Name", "Speculation_Store_Bypass", "SpeculationIndirectBranch", "Cpus_allowed", "untag_mask", "SigQ", "CapBnd");
-    private final List<String> popThreeCharsReturnIntList = Arrays.asList("VmPeak", "VmSize", "VmLck", "VmPin", "VmHWM", "VmRSS", "RssAnon", "RssFile", "RssShmem", "VmData", "VmStk", "VmExe", "VmLib", "VmPTE", "VmSwap", "HugetlbPages", "SigPnd", "ShdPnd", "SigBlk", "SigIgn", "SigCgt", "CapInh", "CapPrm", "CapEff", "CapAmb");
+    private final List<String> trimOnlyItemsList = Arrays.asList("Umask", "Name", "Speculation_Store_Bypass", "SpeculationIndirectBranch", "SigIgn", "Cpus_allowed", "untag_mask", "SigQ", "CapBnd",  "CapPrm", "CapEff");
+    private final List<String> popThreeCharsReturnIntList = Arrays.asList("VmPeak", "VmSize", "VmLck", "VmPin", "VmHWM", "VmRSS", "RssAnon", "RssFile", "RssShmem", "VmData", "VmStk", "VmExe", "VmLib", "VmPTE", "VmSwap", "HugetlbPages", "SigPnd", "ShdPnd", "SigBlk", "SigCgt", "CapInh","CapAmb");
     private final List<String> parseLongList = Arrays.asList("Seccomp","NoNewPrivs", "Tgid", "Ngid", "Pid", "PPid", "TracerPid", "FDSize", "NStgid", "NSpid", "NSpgid", "NSsid", "Kthread", "CoreDumping", "THP_enabled", "Threads", "voluntary_ctxt_switches", "nonvoluntary_ctxt_switches", "Seccomp_filters", "Mems_allowed_list");
     private final List<String> processMemsAllowedList = Arrays.asList("Mems_allowed");
     private final List<String> processCpusAllowedListList = Arrays.asList("Cpus_allowed_list");
     private final List<String> processProcStateList = Arrays.asList("State");
-    private final List<String> parseIntArraySplitOnSpaceList = Arrays.asList("Groups");
     private final List<String> parseIDsList = Arrays.asList("Uid", "Gid");
 
     private ConversionOperation processIDs = (idString -> {
@@ -70,11 +69,14 @@ public class ProcPIDStatus {
             case "D (uninterruptable sleep)":
                 stateToReturn = ProcState.UNINTERRUPTABLE_SLEEP;
                 break;
+            case "I (idle)":
+                stateToReturn = ProcState.IDLE;
+                break;
         }
         return stateToReturn;
     });
 
-    public Map<String, Object> getProcessInfo(int pid) throws IOException {
+    public Map<String, Object> getProcessInfo(int pid) throws IOException, KVPParser.KVPLineParsingException {
         List<Map<String, Object>> procCPUInfoTables = new ArrayList<Map<String, Object>>();
 
         KVPParser parser = new KVPParser();
@@ -84,7 +86,7 @@ public class ProcPIDStatus {
         parser.addConversion(processMemsAllowedList, processMemsAllowed);
         parser.addConversion(processCpusAllowedListList, processCpusAllowedList);
         parser.addConversion(processProcStateList, processProcState);
-        parser.addConversion(parseIntArraySplitOnSpaceList, KVPParser.premadeConversionOperation.PARSE_INT_ARRAY_SPLIT_ON_SPACE);
+//        parser.addConversion(parseIntArraySplitOnSpaceList, KVPParser.premadeConversionOperation.PARSE_INT_ARRAY_SPLIT_ON_SPACE);
         parser.addConversion(parseIDsList, processIDs);
 
         String[] lines = parser.getLines("/proc/" + pid + "/status");
@@ -92,7 +94,7 @@ public class ProcPIDStatus {
         Map<String, Object> thisProcess = new Hashtable<String, Object>();
         for (String line : lines) {
             try{
-                if (line.contains("x86_Thread_features")) {
+                if (line.contains("x86_Thread_features") || line.contains("Groups")) {
                     continue;
                 }
 
@@ -102,7 +104,9 @@ public class ProcPIDStatus {
                 } else {
                     thisProcess.put(kvp.getKey(), kvp.getValue());
                 }
-            }catch(Exception x){
+            } catch (KVPParser.KVPLineParsingException KVPe) {
+                throw new KVPParser.KVPLineParsingException(KVPe.getMessage());
+            } catch(Exception x){
                 x.printStackTrace();
             }
         }
