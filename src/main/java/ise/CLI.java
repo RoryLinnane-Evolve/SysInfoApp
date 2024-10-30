@@ -156,34 +156,41 @@ public class CLI {
         // Print the output
         System.out.println(output);
     }
-    public static void processInfo(){
+    public static void processInfo(String procNo){
         // Instantiate ProcPIDStatus and ProcPIDStat
         ProcPIDStatus procPIDStatus = new ProcPIDStatus();
         ProcPIDStat procPIDStat = new ProcPIDStat();
+
 
         try {
             // Retrieve a list of all active PIDs using the `ps` command
             List<Integer> activePIDs = getActivePIDs();
 
             // Loop through each PID to retrieve status and stat information
+            boolean empty = true;
             for (int pid : activePIDs) {
-                System.out.println("Process Information for PID: " + pid);
+                if (procNo.equals("") || pid == Integer.parseInt(procNo.substring(3))){
+                    System.out.println("Process Information for PID: " + pid);
+                    empty = false;
+                    // Retrieve process status information for the current PID
+                    Map<String, Object> statusInfo = procPIDStatus.getProcessInfo(pid);
+                    System.out.println("Status Information:");
+                    for (Map.Entry<String, Object> entry : statusInfo.entrySet()) {
+                        System.out.println(entry.getKey() + " : " + entry.getValue());
+                    }
 
-                // Retrieve process status information for the current PID
-                Map<String, Object> statusInfo = procPIDStatus.getProcessInfo(pid);
-                System.out.println("Status Information:");
-                for (Map.Entry<String, Object> entry : statusInfo.entrySet()) {
-                    System.out.println(entry.getKey() + " : " + entry.getValue());
+                    // Retrieve process stat information for the current PID
+                    Map<String, Object> statInfo = procPIDStat.getProcPIDStatInfo(pid);
+                    System.out.println("Stat Information:");
+                    for (Map.Entry<String, Object> entry : statInfo.entrySet()) {
+                        System.out.println(entry.getKey() + " : " + entry.getValue());
+                    }
+
+                    System.out.println("--------------------------------------------------");
                 }
-
-                // Retrieve process stat information for the current PID
-                Map<String, Object> statInfo = procPIDStat.getProcPIDStatInfo(pid);
-                System.out.println("Stat Information:");
-                for (Map.Entry<String, Object> entry : statInfo.entrySet()) {
-                    System.out.println(entry.getKey() + " : " + entry.getValue());
-                }
-
-                System.out.println("--------------------------------------------------");
+            }
+            if (empty){
+                System.out.println("That was not a pid.");
             }
         } catch (IOException e) {
             System.err.println("An error occurred while retrieving process information: " + e.getMessage());
@@ -270,7 +277,11 @@ public class CLI {
                     printHelp(options);
                 }
             } else if (cl.hasOption(process.getLongOpt())){
-                processInfo();
+                if (args.length == 1){
+                    processInfo("");
+                } else {
+                    processInfo(args[1]);
+                }
             } else if (cl.hasOption(server.getLongOpt())){
                 serverRun();
             }else if (cl.hasOption(help.getLongOpt())) {
